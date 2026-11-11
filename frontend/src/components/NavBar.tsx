@@ -11,9 +11,6 @@ export default function NavBar() {
 
                 <div className="flex items-center gap-4">
                     <ul className="flex items-center gap-4">
-                        <Link to="https://google.com">Google</Link>
-                        <Link to="https://youtube.com">Youtube</Link>
-                        <Link to="https://x.com">X</Link>
                     </ul>
                 </div>
             </div>
