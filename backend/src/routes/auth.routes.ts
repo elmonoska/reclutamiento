@@ -66,4 +66,14 @@ authRouter.post(
     AuthController.resetPassword
 );
 
+authRouter.post(
+    '/logout',
+    AuthController.logout
+);
+
+authRouter.get(
+    '/verify',
+    AuthController.verifySession
+)
+
 export default authRouter;

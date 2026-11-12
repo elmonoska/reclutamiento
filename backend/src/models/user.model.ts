@@ -1,4 +1,5 @@
-import { AutoIncrement, Column, DataType, Default, DefaultScope, Model, PrimaryKey, Scopes, Table } from "sequelize-typescript";
+import { AutoIncrement, Column, DataType, Default, DefaultScope, HasOne, Model, PrimaryKey, Scopes, Table } from "sequelize-typescript";
+import AuthToken from "./auth-token.model";
 
 @DefaultScope(() => ({
     attributes: {exclude: ['password']}
@@ -31,17 +32,20 @@ export default class User extends Model {
     declare uuid_user: string
 
     @Column({
-        type: DataType.STRING(100)
+        type: DataType.STRING(100),
+        allowNull: false
     })
     declare name: string
 
     @Column({
-        type: DataType.STRING(100)
+        type: DataType.STRING(100),
+        allowNull: false
     })
     declare email: string
 
     @Column({
-        type: DataType.STRING(100)
+        type: DataType.STRING(100),
+        allowNull: false
     })
     declare password: string
 
@@ -50,4 +54,7 @@ export default class User extends Model {
         type: DataType.BOOLEAN
     })
     declare confirmed: boolean
+
+    @HasOne(() => AuthToken)
+    declare token: AuthToken[]
 }

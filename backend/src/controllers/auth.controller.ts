@@ -3,6 +3,8 @@ import Logger from '../utils/logger.utils'
 import { normalizeError, sendError, sendSuccess } from '../helpers/response.helper';
 import { TRequestWithUser, TRequestWithUserAndToken } from '../types/auth';
 import AuthService from '../services/auth.service';
+import { NODE_ENV } from '../constants';
+import { validateJWT } from '../utils/auth/jwt.utils';
 
 export default class AuthController {
     static async createAccount(req: Request, res: Response) {
@@ -34,7 +36,15 @@ export default class AuthController {
             const { password } = req.body;
             const jwt = await AuthService.authenticate(password, req.user!);
 
-            return sendSuccess(res, 200, 'Inicio de sesion exitoso', {token: jwt});
+            // añadir el token en cookies
+            res.cookie('token', jwt, {
+                httpOnly: true,
+                secure: NODE_ENV === 'production',
+                sameSite: 'strict',
+                maxAge: 30 * 60 * 1_000 // 30 minutos
+            });
+
+            return sendSuccess(res, 200, 'Inicio de sesion exitoso');
         } catch (err) {
             Logger.error(`Ocurrio un error al ingresar a la cuenta: ${normalizeError(err)}`);
             if (err instanceof Error) {
@@ -70,6 +80,37 @@ export default class AuthController {
         } catch (err) {
             Logger.error(`Ocurrio un error al restablecer la contraseña: ${normalizeError(err)}`);
             return sendError(res, 500, 'Ocurrio un error al restablecer la contraseña');
+        }
+    }
+
+    static async logout(req: Request, res: Response) {
+        try {
+            // limpia la cookie con el jwt
+            res.clearCookie('token', {
+                httpOnly: true,
+                secure: NODE_ENV === 'production',
+                sameSite: 'strict'
+            });
+            return sendSuccess(res, 200, 'Sesion cerrada exitosamente');
+        } catch (err) {
+            Logger.error(`Ocurrio un error al cerrar la sesion: ${normalizeError(err)}`);
+            return sendError(res, 500, 'Ocurrio un error al cerrar la sesion');
+        }
+    }
+
+    static async verifySession(req: Request, res: Response) {
+        try {
+            const token = req.cookies.token;
+            if (!token) {
+                return sendError(res, 401, 'No hay sesion activa');
+            }
+
+            validateJWT(token);
+
+            return sendSuccess(res, 200, 'Sesion valida');
+        } catch (err) {
+            Logger.error(`Ocurrio un error al verificar la sesion: ${normalizeError(err)}`);
+            return sendError(res, 500, 'Ocurrio un error al verificar la sesion');
         }
     }
 }

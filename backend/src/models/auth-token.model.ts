@@ -13,14 +13,9 @@ export default class AuthToken extends Model {
     })
     declare id_auth_token: number
 
-    @ForeignKey(() => User)
     @Column({
-        type: DataType.INTEGER
-    })
-    declare id_user: number
-
-    @Column({
-        type: DataType.INTEGER
+        type: DataType.INTEGER,
+        allowNull: false
     })
     declare token: number
 
@@ -28,6 +23,13 @@ export default class AuthToken extends Model {
         type: DataType.DATE
     })
     declare expired_at: Date
+
+    @ForeignKey(() => User)
+    @Column({
+        type: DataType.INTEGER,
+        allowNull: false
+    })
+    declare id_user: number
 
     @BelongsTo(() => User)
     declare user: User;
