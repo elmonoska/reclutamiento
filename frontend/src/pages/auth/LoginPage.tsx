@@ -5,6 +5,7 @@ import type { TLoginForm } from "../../types/forms";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { login } from "../../api/auth";
 import { toast } from "react-toastify";
+import { useAuth } from "../../contexts/AuthContext";
 
 const initialValues: TLoginForm = {
     email: '',
@@ -14,6 +15,7 @@ const initialValues: TLoginForm = {
 export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
+    const { checkAuth } = useAuth();
 
     const {
         register,
@@ -28,9 +30,9 @@ export default function LoginPage() {
             return;
         }
 
+        await checkAuth();
+        navigate('/')
         toast.success(res.message);
-        localStorage.setItem('token', res.data.token);
-        navigate('/');
     };
 
     return (

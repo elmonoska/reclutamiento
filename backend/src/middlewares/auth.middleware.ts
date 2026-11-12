@@ -1,9 +1,9 @@
 import {Request, Response, NextFunction} from 'express';
 import Logger from '../utils/logger.utils';
 import { normalizeError, sendError } from '../helpers/response.helper';
-import User from '../models/user.model';
 import { TRequestWithUser, TRequestWithUserAndToken } from '../types/auth';
 import AuthToken from '../models/auth-token.model';
+import User from '../models/user.model';
 
 export async function preventDuplicateEmail(req: Request, res: Response, next: NextFunction) {
     try {

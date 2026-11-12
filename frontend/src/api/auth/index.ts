@@ -47,3 +47,20 @@ export async function resetPassword(dataForm: TResetPasswordForm & { uuid_user: 
         return { success: false, message: apiErrorHandler(err) };
     }
 }
+
+export async function logout(): Promise<TApiResponse> {
+    try {
+        const { data } = await api.post('/auth/logout');
+        return data;
+    } catch (err) {
+        return { success: false, message: apiErrorHandler(err) };
+    }
+}
+
+export async function verifySesion(): Promise<TApiResponse | void> {
+    try {
+        await api.get('/auth/verify');
+    } catch (err) {
+        return { success: false, message: apiErrorHandler(err) }
+    }
+}
