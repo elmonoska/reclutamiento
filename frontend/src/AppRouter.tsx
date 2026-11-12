@@ -7,6 +7,9 @@ import AppLayout from "./layouts/AppLayout"
 import AppIndexPage from "./pages/AppIndexPage"
 import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage"
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage"
+import AccountLayout from "./layouts/AccountLayout"
+import PanelIndexPage from "./pages/panel/PanelIndexPage"
+import CrearVacantePage from "./pages/panel/CrearVacantePage"
 
 export default function AppRouter() {
 
@@ -22,11 +25,20 @@ export default function AppRouter() {
           <Route path="restablecer-contrasena/:uuidUser" element={<ResetPasswordPage />} />
         </Route>
 
-        {/* app */}
+        {/* postulaciones publicas */}
         <Route path="/" element={<AppLayout />}>
           <Route index element={<AppIndexPage />} />
         </Route>
+
+        {/* administracion de vacantes */}
+        <Route path="panel" element={<AccountLayout />}>
+          <Route index element={<PanelIndexPage />} />
+          <Route path="vacantes/crear" element={<CrearVacantePage />} />
+        </Route>
+
       </Routes>
+
+
     </BrowserRouter>
   )
 }
