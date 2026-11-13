@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { handleInputErrors } from "../middlewares/index.middleware";
 import { body } from "express-validator";
-import { getUserByEmail, getUserByUuid, preventDuplicateEmail, requireUnconfirmedAccount, validateAuthTokenById } from "../middlewares/auth.middleware";
+import { getUserByEmail, getUserByUuid, preventDuplicateEmail, requireUnconfirmedAccount, validateAuthTokenById, validateCookieToken } from "../middlewares/auth.middleware";
 import AuthController from "../controllers/auth.controller";
 
 const authRouter = Router();
@@ -73,6 +73,7 @@ authRouter.post(
 
 authRouter.get(
     '/verify',
+    validateCookieToken,
     AuthController.verifySession
 )
 

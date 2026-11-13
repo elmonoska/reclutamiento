@@ -98,16 +98,9 @@ export default class AuthController {
         }
     }
 
-    static async verifySession(req: Request, res: Response) {
+    static async verifySession(req: TRequestWithUser, res: Response) {
         try {
-            const token = req.cookies.token;
-            if (!token) {
-                return sendError(res, 401, 'No hay sesion activa');
-            }
-
-            validateJWT(token);
-
-            return sendSuccess(res, 200, 'Sesion valida');
+            return sendSuccess(res, 200, 'Sesion valida', {user: req.user});
         } catch (err) {
             Logger.error(`Ocurrio un error al verificar la sesion: ${normalizeError(err)}`);
             return sendError(res, 500, 'Ocurrio un error al verificar la sesion');

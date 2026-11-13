@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { forgotPassword } from "../../api/auth";
-import type { TForgotPasswordForm } from "../../types/forms";
+import type { TForgotPasswordForm } from "../../types/form.type";
 
 const initialValues: TForgotPasswordForm = {
     email: '',

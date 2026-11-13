@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { toast } from "react-toastify";
 import { resetPassword } from "../../api/auth";
-import type { TResetPasswordForm } from "../../types/forms";
+import type { TResetPasswordForm } from "../../types/form.type";
 
 const initialValues: TResetPasswordForm = {
     password: '',

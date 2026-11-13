@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router";
 import { useForm } from "react-hook-form";
-import type { TSignupForm } from "../../types/forms";
+import type { TSignupForm } from "../../types/form.type";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { toast } from "react-toastify";
 import { createAccount } from "../../api/auth";

@@ -1,10 +1,13 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, type Dispatch, type ReactNode, type SetStateAction } from "react";
 import { verifySesion } from "../api/auth";
+import type { TUser } from "../types/auth.type";
 
 type TAuthContext = {
     isAuthenticated: boolean;
     isLoading: boolean;
     checkAuth: () => Promise<void>;
+    user: TUser | null;
+    setUser: Dispatch<SetStateAction<TUser | null>>;
 }
 
 type TAuthProvider = {
@@ -16,12 +19,16 @@ const AuthContext = createContext<TAuthContext | undefined>(undefined);
 export function AuthProvider({ children }: TAuthProvider) {
     const [isLoading, setIsLoading] = useState(true);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [user, setUser] = useState<TUser | null>(null)
 
     async function checkAuth() {
         setIsLoading(true);
         try {
-            await verifySesion();
-            setIsAuthenticated(true);
+            const res = await verifySesion();
+            if (res.success) {
+                setUser(res.data.user);
+                setIsAuthenticated(true);
+            } 
         } catch (err) {
             console.error(err);
             setIsAuthenticated(false);
@@ -35,7 +42,7 @@ export function AuthProvider({ children }: TAuthProvider) {
     }, []);
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, isLoading, checkAuth }}>
+        <AuthContext.Provider value={{ isAuthenticated, isLoading, checkAuth, user, setUser }}>
             {children}
         </AuthContext.Provider>
     );
