@@ -1,7 +1,7 @@
-import api from "../../lib/axios";
-import type { TApiResponse, TApiResponseLogin, TApiResponseVerify } from "../../types/api.type";
-import type { TLoginForm, TSignupForm, TForgotPasswordForm, TResetPasswordForm, TConfirmAccountForm } from "../../types/form.type";
-import { apiErrorHandler } from "../../utils/apiErrorHandler";
+import api from "../lib/axios";
+import type { TApiResponse, TApiResponseLogin, TApiResponseVerify } from "../types/api.type";
+import type { TLoginForm, TSignupForm, TForgotPasswordForm, TResetPasswordForm, TConfirmAccountForm } from "../types/form.type";
+import { apiErrorHandler } from "../utils/apiErrorHandler";
 
 export async function createAccount(dataForm: TSignupForm): Promise<TApiResponse> {
     try {

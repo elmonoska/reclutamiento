@@ -1,5 +1,8 @@
 import { useForm } from "react-hook-form";
-import type { TJobPostingForm } from "../../types/forms";
+import type { TJobPostingForm } from "../../types/form.type";
+import { useEffect, useState } from "react";
+import { getCatalogs } from "../../api/job-posting";
+import type { TCatalog } from "../../types/api.type";
 
 const initialValues: TJobPostingForm = {
     title: "",
@@ -17,6 +20,8 @@ const initialValues: TJobPostingForm = {
 };
 
 export default function CrearVacantePage() {
+    const [catalogs, setCatalogs] = useState();
+
     const {
         register,
         handleSubmit,
@@ -26,6 +31,16 @@ export default function CrearVacantePage() {
     const sendForm = async (dataForm: TJobPostingForm) => {
         void dataForm;
     };
+
+    useEffect(() => {
+        async function init(){
+            const res = await getCatalogs();
+            if (res.success) {
+                console.log(res.data)
+            }
+        }
+        init();
+    }, [])
 
     return (
         <div className="py-8 px-4">

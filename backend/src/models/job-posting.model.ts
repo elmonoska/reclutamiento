@@ -5,6 +5,7 @@ import CatExperienceLevel from "./catalogs/cat-experience-level.model";
 import CatEducationLevel from "./catalogs/cat-education-level.model";
 import CatWorkModel from "./catalogs/cat-work-model.model";
 import CatState from "./catalogs/cat-state.model";
+import User from "./user.model";
 
 @Table({
     tableName: 'job_posting',
@@ -56,6 +57,13 @@ export default class JobPosting extends Model {
     })
     declare status: string
 
+    @ForeignKey(() => User)
+    @Column({
+        type: DataType.INTEGER,
+        allowNull: false
+    })
+    declare id_user: number
+
     @ForeignKey(() => CatState)
     @Column({
         type: DataType.INTEGER,
@@ -68,7 +76,7 @@ export default class JobPosting extends Model {
         type: DataType.INTEGER,
         allowNull: false
     })
-    declare id_category: number
+    declare id_category_job: number
 
     @ForeignKey(() => CatEmploymentType)
     @Column({
@@ -98,11 +106,14 @@ export default class JobPosting extends Model {
     })
     declare id_work_model: number
 
+    @BelongsTo(() => User)
+    declare user: User
+
     @BelongsTo(() => CatState)
     declare state: CatState
 
     @BelongsTo(() => CatCategoryJob)
-    declare category: CatCategoryJob
+    declare categoryJob: CatCategoryJob
 
     @BelongsTo(() => CatEmploymentType)
     declare employmentType: CatEmploymentType
