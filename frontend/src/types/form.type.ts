@@ -19,9 +19,8 @@ export type TJobPostingForm = {
     benefits: string;
     salary_min: number | '';
     salary_max: number | '';
-    status: string;
     id_state: number | '';
-    id_category: number | '';
+    id_job_category: number | '';
     id_employment_type: number | '';
     id_experience_level: number | '';
     id_education_level: number | '';
