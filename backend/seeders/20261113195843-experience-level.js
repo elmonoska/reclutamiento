@@ -3,7 +3,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-     await queryInterface.bulkInsert('cat_experience_level', [
+     await queryInterface.bulkInsert('cat_experience_levels', [
       { name: 'Trainee / Becario' },
       { name: 'Junior' },
       { name: 'Semi-Senior' },

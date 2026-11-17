@@ -3,7 +3,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-     await queryInterface.bulkInsert('cat_education_level', [
+     await queryInterface.bulkInsert('cat_education_levels', [
       { name: 'Secundaria' },
       { name: 'Bachillerato / Preparatoria' },
       { name: 'Técnico / Carrera Técnica' },

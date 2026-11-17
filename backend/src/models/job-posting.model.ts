@@ -1,14 +1,14 @@
 import { AutoIncrement, BelongsTo, Column, DataType, ForeignKey, Model, PrimaryKey, Table } from "sequelize-typescript";
-import CatCategoryJob from "./catalogs/cat-category-job.model";
 import CatEmploymentType from "./catalogs/cat-employment-type.model";
 import CatExperienceLevel from "./catalogs/cat-experience-level.model";
 import CatEducationLevel from "./catalogs/cat-education-level.model";
 import CatWorkModel from "./catalogs/cat-work-model.model";
 import CatState from "./catalogs/cat-state.model";
 import User from "./user.model";
+import CatJobCategory from "./catalogs/cat-job-category.model";
 
 @Table({
-    tableName: 'job_posting',
+    tableName: 'job_postings',
     timestamps: true,
     underscored: true,
     paranoid: true
@@ -52,17 +52,18 @@ export default class JobPosting extends Model {
     declare salary_max: number
 
     @Column({
-        type: DataType.STRING,
-        allowNull: false
+        type: DataType.ENUM('published', 'closed'),
+        allowNull: false,
+        defaultValue: 'published'
     })
-    declare status: string
+    declare status: 'published' | 'closed'
 
     @ForeignKey(() => User)
     @Column({
         type: DataType.INTEGER,
         allowNull: false
     })
-    declare id_user: number
+    declare created_by: number
 
     @ForeignKey(() => CatState)
     @Column({
@@ -71,12 +72,12 @@ export default class JobPosting extends Model {
     })
     declare id_state: number
 
-    @ForeignKey(() => CatCategoryJob)
+    @ForeignKey(() => CatJobCategory)
     @Column({
         type: DataType.INTEGER,
         allowNull: false
     })
-    declare id_category_job: number
+    declare id_job_category: number
 
     @ForeignKey(() => CatEmploymentType)
     @Column({
@@ -107,13 +108,13 @@ export default class JobPosting extends Model {
     declare id_work_model: number
 
     @BelongsTo(() => User)
-    declare user: User
+    declare createdBy: User
 
     @BelongsTo(() => CatState)
     declare state: CatState
 
-    @BelongsTo(() => CatCategoryJob)
-    declare categoryJob: CatCategoryJob
+    @BelongsTo(() => CatJobCategory)
+    declare jobCategory: CatJobCategory
 
     @BelongsTo(() => CatEmploymentType)
     declare employmentType: CatEmploymentType

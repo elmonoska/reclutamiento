@@ -2,16 +2,16 @@ import {AutoIncrement, Column, DataType, HasMany, Model, PrimaryKey, Table } fro
 import JobPosting from "../job-posting.model";
 
 @Table({
-    tableName: 'cat_category_job',
+    tableName: 'cat_job_categories',
     timestamps: false
 })
-export default class CatCategoryJob extends Model {
+export default class CatJobCategory extends Model {
     @AutoIncrement
     @PrimaryKey
     @Column({
         type: DataType.INTEGER
     })
-    declare id_cat_category_job: number
+    declare id_cat_job_category: number
 
     @Column({
         type: DataType.STRING,

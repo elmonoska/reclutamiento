@@ -2,7 +2,7 @@ import { AutoIncrement, Column, DataType, HasMany, Model, PrimaryKey, Table } fr
 import JobPosting from "../job-posting.model";
 
 @Table({
-    tableName: 'cat_state',
+    tableName: 'cat_states',
     timestamps: false
 })
 export default class CatState extends Model {

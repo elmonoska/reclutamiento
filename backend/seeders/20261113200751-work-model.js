@@ -3,7 +3,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-     await queryInterface.bulkInsert('cat_work_model', [
+     await queryInterface.bulkInsert('cat_work_models', [
       { name: 'Presencial' },
       { name: 'Híbrido' },
       { name: 'Remoto / Home Office' },
