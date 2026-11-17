@@ -3,8 +3,8 @@ import Logger from '../utils/logger.utils'
 import { normalizeError, sendError, sendSuccess } from '../helpers/response.helper';
 import { TRequestWithUser, TRequestWithUserAndToken } from '../types/auth';
 import AuthService from '../services/auth.service';
-import { NODE_ENV } from '../constants';
-import { validateJWT } from '../utils/auth/jwt.utils';
+import { NODE_ENV, TOKEN_DURATION_MINUTES } from '../constants';
+import { getExpirationTime } from '../utils/time.utils';
 
 export default class AuthController {
     static async createAccount(req: Request, res: Response) {
@@ -35,13 +35,14 @@ export default class AuthController {
         try {
             const { password } = req.body;
             const jwt = await AuthService.authenticate(password, req.user!);
+            const { cookieMs } = getExpirationTime(TOKEN_DURATION_MINUTES);
 
             // añadir el token en cookies
             res.cookie('token', jwt, {
                 httpOnly: true,
                 secure: NODE_ENV === 'production',
                 sameSite: 'strict',
-                maxAge: 30 * 60 * 1_000 // 30 minutos
+                maxAge: cookieMs
             });
 
             return sendSuccess(res, 200, 'Inicio de sesion exitoso');

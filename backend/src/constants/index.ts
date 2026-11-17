@@ -12,3 +12,5 @@ export const FRONTEND_URL = process.env.FRONTEND_URL || '';
 export const JWT_SECRET = process.env.JWT_SECRET || '' as string;
 
 export const NODE_ENV = process.env.NODE_ENV || 'development';
+
+export const TOKEN_DURATION_MINUTES = parseInt(process.env.TOKEN_DURATION_MINUTES as string, 10) || 30;
