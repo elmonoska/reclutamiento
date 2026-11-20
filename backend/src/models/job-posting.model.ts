@@ -1,4 +1,4 @@
-import { AutoIncrement, BelongsTo, Column, DataType, ForeignKey, Model, PrimaryKey, Table } from "sequelize-typescript";
+import { AutoIncrement, BelongsTo, Column, DataType, Default, ForeignKey, Model, PrimaryKey, Table } from "sequelize-typescript";
 import CatEmploymentType from "./catalogs/cat-employment-type.model";
 import CatExperienceLevel from "./catalogs/cat-experience-level.model";
 import CatEducationLevel from "./catalogs/cat-education-level.model";
@@ -20,12 +20,24 @@ export default class JobPosting extends Model {
         type: DataType.INTEGER
     })
     declare id_job_posting: number
+
+    @Default(DataType.UUIDV4)
+    @Column({
+        type: DataType.UUID
+    })
+    declare uuid_job_posting: string
     
     @Column({
         type: DataType.STRING,
         allowNull: false
     })
     declare title: string
+
+    @Column({
+        type: DataType.TEXT,
+        allowNull: false,
+    })
+    declare description: string
 
     @Column({
         type: DataType.TEXT,

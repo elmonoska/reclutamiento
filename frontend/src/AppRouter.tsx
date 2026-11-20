@@ -10,6 +10,9 @@ import ResetPasswordPage from "./pages/auth/ResetPasswordPage"
 import AccountLayout from "./layouts/AccountLayout"
 import PanelIndexPage from "./pages/panel/PanelIndexPage"
 import CreateJobPostingPage from "./pages/panel/CreateJobPostingPage"
+import JobPostingDetailsPage from "./pages/panel/JobPostingDetailsPage"
+import EditJobPostingPage from "./pages/panel/EditJobPostingPage"
+import JobPostingPage from "./pages/panel/JobPostingsPage"
 
 export default function AppRouter() {
 
@@ -34,6 +37,9 @@ export default function AppRouter() {
         <Route path="panel" element={<AccountLayout />}>
           <Route index element={<PanelIndexPage />} />
           <Route path="vacantes/crear" element={<CreateJobPostingPage />} />
+          <Route path="vacantes/:id" element={<JobPostingDetailsPage />} />
+          <Route path="vacantes/:id/editar" element={<EditJobPostingPage />} />
+          <Route path="vacantes/" element={<JobPostingPage />} />
         </Route>
 
       </Routes>

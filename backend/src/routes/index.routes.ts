@@ -6,6 +6,6 @@ const router = Router();
 
 router.use('/auth', authRouter);
 
-router.use('/job-posting', jobPostingRouter);
+router.use('/job-postings', jobPostingRouter);
 
 export default router;

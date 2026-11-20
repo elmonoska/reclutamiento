@@ -1,18 +1,18 @@
 import { Controller, useForm } from "react-hook-form";
 import type { TJobPostingForm } from "../../types/form.type";
-import { useEffect, useState } from "react";
-import { createJobPosting, getCatalogs } from "../../api/job-posting";
-import type { TApiResponseCatalogs } from "../../types/api.type";
+import { createJobPosting } from "../../api/job-posting";
 import RichTextEditor from "../../components/RichTextEditor";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
+import { usePanel } from "../../contexts/PanelContext";
 
 const initialValues: TJobPostingForm = {
     title: "",
+    description: "",
     requirements: "",
     benefits: "",
-    salary_min: "",
-    salary_max: "",
+    salary_min: null,
+    salary_max: null,
     id_state: "",
     id_job_category: "",
     id_employment_type: "",
@@ -21,24 +21,15 @@ const initialValues: TJobPostingForm = {
     id_work_model: "",
 };
 
-const initialCatalogs: TApiResponseCatalogs = {
-    educationLevels: [],
-    employmentTypes: [],
-    experienceLevels: [],
-    jobCategories: [],
-    states: [],
-    workModels: []
-};
-
 export default function CreateJobPostingPage() {
-    const [catalogs, setCatalogs] = useState<TApiResponseCatalogs>(initialCatalogs);
     const navigate = useNavigate();
+    const { catalogs } = usePanel();
 
     const {
         register,
         control,
         handleSubmit,
-        formState: { errors },
+        formState: { errors, isValid },
     } = useForm<TJobPostingForm>({ defaultValues: initialValues, mode: "onChange" });
 
     const validateRichText = (value: string) => value.replace(/<[^>]*>/g, "").trim().length > 0;
@@ -53,20 +44,14 @@ export default function CreateJobPostingPage() {
         navigate('/panel');
     };
 
-    useEffect(() => {
-        async function init(){
-            const res = await getCatalogs();
-            if (res.success) {
-                setCatalogs(res.data);
-            }
-        }
-        init();
-    }, [])
-
     return (
-        <div className="py-8 px-4">
-            <div className="w-full max-w-2xl mx-auto">
-                <div className="text-center mb-8">
+        <div className="py-8 px-4 max-w-4xl mx-auto space-y-6">
+            <Link to="/panel" className="inline-block text-sm font-medium text-orange-600 hover:text-orange-700 transition">
+                &larr; Volver al panel
+            </Link>
+
+            <div className="w-full">
+                <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-900">Crear vacante</h1>
                     <p className="mt-2 text-gray-500">Completa la información para publicar una nueva vacante</p>
                 </div>
@@ -89,6 +74,32 @@ export default function CreateJobPostingPage() {
                             />
                             {errors.title && (
                                 <p className="mt-1 text-sm text-red-500">{errors.title.message}</p>
+                            )}
+                        </div>
+
+                        {/* descripcion */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Descripción
+                            </label>
+                            <Controller
+                                name="description"
+                                control={control}
+                                rules={{
+                                    validate: (value) =>
+                                        validateRichText(value) || "La descripción es obligatoria",
+                                }}
+                                render={({ field }) => (
+                                    <RichTextEditor
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                        onBlur={field.onBlur}
+                                        placeholder="Describe la vacante"
+                                    />
+                                )}
+                            />
+                            {errors.description && (
+                                <p className="mt-1 text-sm text-red-500">{errors.description.message}</p>
                             )}
                         </div>
 
@@ -309,7 +320,7 @@ export default function CreateJobPostingPage() {
 
                         <button
                             type="submit"
-                            // disabled={!isValid}
+                            disabled={!isValid}
                             className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition duration-200 shadow-sm cursor-pointer disabled:bg-orange-200 disabled:cursor-not-allowed disabled:text-white"
                         >
                             Crear vacante

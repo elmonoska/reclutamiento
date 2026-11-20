@@ -15,14 +15,19 @@ export type TResetPasswordForm = Pick<TAuthForm, 'password' | 'confirm_password'
 
 export type TJobPostingForm = {
     title: string;
+    description: string;
     requirements: string;
     benefits: string;
-    salary_min: number | '';
-    salary_max: number | '';
+    salary_min: number | null;
+    salary_max: number | null;
     id_state: number | '';
     id_job_category: number | '';
     id_employment_type: number | '';
     id_experience_level: number | '';
     id_education_level: number | '';
     id_work_model: number | '';
+};
+
+export type TEditJobPostingForm = TJobPostingForm & {
+    status: 'published' | 'closed' | '';
 };

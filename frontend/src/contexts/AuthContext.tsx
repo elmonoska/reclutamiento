@@ -28,9 +28,13 @@ export function AuthProvider({ children }: TAuthProvider) {
             if (res.success) {
                 setUser(res.data.user);
                 setIsAuthenticated(true);
-            } 
+            } else {
+                setUser(null);
+                setIsAuthenticated(false);
+            }
         } catch (err) {
             console.error(err);
+            setUser(null);
             setIsAuthenticated(false);
         } finally {
             setIsLoading(false);
