@@ -1,9 +1,11 @@
 'use strict';
 
+const TABLE_NAME = 'cat_education_levels'
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-     await queryInterface.bulkInsert('cat_education_levels', [
+     await queryInterface.bulkInsert(TABLE_NAME, [
       { name: 'Secundaria' },
       { name: 'Bachillerato / Preparatoria' },
       { name: 'Técnico / Carrera Técnica' },
@@ -19,6 +21,6 @@ module.exports = {
 
   async down (queryInterface, Sequelize) {
     // borra todos los datos al revertir del seeder
-    await queryInterface.bulkDelete('cat_education_level', null, {});
+    await queryInterface.bulkDelete(TABLE_NAME, null, {});
   }
 };

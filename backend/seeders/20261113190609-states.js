@@ -1,9 +1,11 @@
 'use strict';
 
+const TABLE_NAME = 'cat_states';
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-    await queryInterface.bulkInsert('cat_states', [
+    await queryInterface.bulkInsert(TABLE_NAME, [
       { name: 'Aguascalientes'},
       { name: 'Baja California'},
       { name: 'Baja California Sur'},
@@ -33,7 +35,7 @@ module.exports = {
       { name: 'Tabasco'},
       { name: 'Tamaulipas'},
       { name: 'Tlaxcala'},
-      { name: 'Veracruz de Ignacio de la Llave'},
+      { name: 'Veracruz'},
       { name: 'Yucatán'},
       { name: 'Zacatecas'},
     ], {}) 
@@ -41,6 +43,6 @@ module.exports = {
 
   async down (queryInterface, Sequelize) {
     // borra todos los datos al revertir del seeder
-    await queryInterface.bulkDelete('cat_state', null, {});    
+    await queryInterface.bulkDelete(TABLE_NAME, null, {});    
   }
 };
