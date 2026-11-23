@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import JobPosting from "../models/job-posting.model";
 
 export default class JobPostingService {
@@ -8,31 +9,76 @@ export default class JobPostingService {
     static async getLastJobPostings() {
         const jobPostings = await JobPosting.findAll({
             where: {deleted_at: null},
-            order: [['created_at', 'DESC']],
+            order: [['id_job_posting', 'DESC']],
             limit: 10
         });
         return jobPostings;
     }
 
-    static async getJobPostingById(id) {
-        const jobPosting = await JobPosting.findByPk(id, {paranoid: false});
+    static async getJobPostingById(id: number) {
+        const jobPosting = await JobPosting.findByPk(id, { paranoid: false });
         if (!jobPosting) {
             throw new Error('NOT_FOUND');
         }
         return jobPosting;
-
     }
 
-    static async editJobPostingById(id, body) {
-        const jobPosting = await JobPosting.findByPk(id, {paranoid: false});
-        if (!jobPosting) {
-            throw new Error('NOT_FOUND');
-        }
-
+    static async editJobPostingById(jobPosting: JobPosting, body) {
         await jobPosting.update(body);
     }
 
-    static async getJobPostings(offset: number, limit: number) {
-        return await JobPosting.findAndCountAll({offset, limit, order: [['id_job_posting', 'DESC']]});
+    static async getJobPostings(offset: number, limit: number, search?: string, status?: string) {
+        const where: any = {};
+
+        if (search) {
+            where.title = { [Op.iLike]: `%${search}%` };
+        }
+
+        if (status === 'deleted') {
+            where.deleted_at = { [Op.ne]: null };
+        } else if (status === 'published' || status === 'closed') {
+            where.status = status;
+            where.deleted_at = null;
+        }
+
+        return await JobPosting.findAndCountAll({
+            where,
+            offset,
+            limit,
+            order: [['id_job_posting', 'DESC']],
+            paranoid: false
+        });
+    }
+
+    static async deleteJobPostingById(jobPosting: JobPosting) {
+        await jobPosting.destroy();
+    }
+
+    static async getPublishedJobPostings(offset: number, limit: number, filters: { search?: string; id_employment_type?: number; id_state?: number; id_work_model?: number } = {}) {
+        const where: any = { status: 'published' };
+
+        if (filters.search) {
+            where.title = { [Op.iLike]: `%${filters.search}%` };
+        }
+        if (filters.id_employment_type) where.id_employment_type = filters.id_employment_type;
+        if (filters.id_state) where.id_state = filters.id_state;
+        if (filters.id_work_model) where.id_work_model = filters.id_work_model;
+
+        return await JobPosting.findAndCountAll({
+            where,
+            offset,
+            limit,
+            order: [['id_job_posting', 'DESC']]
+        });
+    }
+
+    static async getPublishedJobPostingById(id: number) {
+        const jobPosting = await JobPosting.findOne({
+            where: { id_job_posting: id, status: 'published' }
+        });
+        if (!jobPosting) {
+            throw new Error('NOT_FOUND');
+        }
+        return jobPosting;
     }
 }

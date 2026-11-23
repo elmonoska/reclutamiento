@@ -2,7 +2,8 @@ import { Router } from "express";
 import JobPostingController from "../controllers/job-posting.controller";
 import { validateCookieToken } from "../middlewares/auth.middleware";
 import { handleInputErrors } from "../middlewares/index.middleware";
-import { body } from "express-validator";
+import { authorizeJobPostingOwner } from "../middlewares/job-posting.middleware";
+import { body, param } from "express-validator";
 import sanitize from "sanitize-html";
 
 const jobPostingRouter: Router = Router();
@@ -39,11 +40,16 @@ jobPostingRouter.get(
 
 jobPostingRouter.get(
     '/:id',
+    param('id').isInt({ min: 1 }).withMessage('Id invalido').toInt(),
+    handleInputErrors,
     JobPostingController.getJobPostingById
 );
 
 jobPostingRouter.put(
-    '/:id',
+    '/:id/edit',
+    param('id').isInt({ min: 1 }).withMessage('Id invalido').toInt(),
+    handleInputErrors,
+    authorizeJobPostingOwner,
     body('title').notEmpty().withMessage('El titulo es requerido'),
     body('description').notEmpty().withMessage('La descripcion es requerida').customSanitizer(value => sanitize(value)),
     body('requirements').notEmpty().withMessage('Los requisitos son requeridos').customSanitizer(value => sanitize(value)),
@@ -63,6 +69,14 @@ jobPostingRouter.put(
 
 jobPostingRouter.get('/',
     JobPostingController.getAllJobPostings
+);
+
+jobPostingRouter.patch(
+    '/:id/delete',
+    param('id').isInt({ min: 1 }).withMessage('Id invalido').toInt(),
+    handleInputErrors,
+    authorizeJobPostingOwner,
+    JobPostingController.deleteJobPosting
 );
 
 export default jobPostingRouter;

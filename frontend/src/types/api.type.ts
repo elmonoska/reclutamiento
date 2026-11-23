@@ -60,9 +60,25 @@ export type TApiResponseLastJobPostings = {
     lastJobPostings: TJobPosting[];
 }
 export type TApiResponseJobPostings = {
+    count: number;
+    totalPages: number;
+    currentPage: number;
+    limit: number;
     jobPostings: TJobPosting[];
 }
 
 export type TApiResponseJobPosting = {
     jobPosting: TJobPosting;
+}
+
+export type TJobPostingFilters = {
+    search?: string;
+    status?: string;
+}
+
+export type TPublicJobPostingFilters = {
+    search?: string;
+    id_employment_type?: number | '';
+    id_state?: number | '';
+    id_work_model?: number | '';
 }

@@ -1,6 +1,7 @@
 import {Request} from 'express';
 import User from '../../models/user.model';
 import AuthToken from '../../models/auth-token.model';
+import JobPosting from '../../models/job-posting.model';
 
 export type TRequestWithUser = Request & {
     user?: User;
@@ -8,4 +9,8 @@ export type TRequestWithUser = Request & {
 
 export type TRequestWithUserAndToken = TRequestWithUser & {
     authToken?: AuthToken;
+}
+
+export type TRequestWithJobPosting = TRequestWithUser & {
+    jobPosting?: JobPosting;
 }

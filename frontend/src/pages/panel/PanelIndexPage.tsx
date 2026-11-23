@@ -71,6 +71,7 @@ export default function PanelIndexPage() {
                                                     to={`/panel/vacantes/${job.id_job_posting}`} 
                                                     className="font-semibold text-gray-900 hover:text-orange-600 transition-colors text-base"
                                                 >
+                                                    <span className="text-gray-400 font-normal mr-2">#{job.id_job_posting}</span>
                                                     {job.title}
                                                 </Link>
                                                 
