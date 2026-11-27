@@ -70,7 +70,7 @@ export default function ForgotPasswordPage() {
                                         message: "Ingresa un correo electrónico válido"
                                     }
                                 })}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                             />
 
                             {errors.email && (
@@ -84,7 +84,7 @@ export default function ForgotPasswordPage() {
                         <button
                             type="submit"
                             disabled={!isValid}
-                            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition duration-200 shadow-sm cursor-pointer disabled:bg-orange-200 disabled:cursor-not-allowed disabled:text-white"
+                            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition duration-200 shadow-sm cursor-pointer disabled:bg-blue-200 disabled:cursor-not-allowed disabled:text-white"
                         >
                             Enviar enlace
                         </button>

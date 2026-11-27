@@ -3,6 +3,8 @@ import Logger from '../utils/logger.utils';
 import { normalizeError, sendError, sendSuccess } from '../helpers/response.helper';
 import CatalogsService from '../services/catalogs.service';
 import JobPostingService from '../services/job-posting.service';
+import { getPagination, getTotalPages } from '../utils/pagination.utils';
+import { APP_ERROR } from '../constants/errors.constants';
 
 export default class PublicJobPostingController {
     static async getCatalogs(_req: Request, res: Response) {
@@ -17,16 +19,15 @@ export default class PublicJobPostingController {
 
     static async getPublishedJobPostings(req: Request, res: Response) {
         try {
-            const page = Math.max(parseInt(req.query.page as string) || 1, 1);
-            const limit = 10;
-            const offset = (page - 1) * limit;
+            const { page, limit, offset } = getPagination(req.query, 10);
             const search = typeof req.query.search === 'string' ? req.query.search.trim() : undefined;
             const id_employment_type = req.query.id_employment_type ? Number(req.query.id_employment_type) : undefined;
             const id_state = req.query.id_state ? Number(req.query.id_state) : undefined;
             const id_work_model = req.query.id_work_model ? Number(req.query.id_work_model) : undefined;
+            const id_job_category = req.query.id_job_category ? Number(req.query.id_job_category) : undefined;
 
-            const jobPostings = await JobPostingService.getPublishedJobPostings(offset, limit, { search, id_employment_type, id_state, id_work_model });
-            const totalPages = Math.max(Math.ceil(jobPostings.count / limit), 1);
+            const jobPostings = await JobPostingService.getPublishedJobPostings(offset, limit, { search, id_employment_type, id_state, id_work_model, id_job_category });
+            const totalPages = getTotalPages(jobPostings.count, limit);
 
             return res.status(200).json({
                 count: jobPostings.count,
@@ -48,7 +49,7 @@ export default class PublicJobPostingController {
             return sendSuccess(res, 200, '', { jobPosting });
         } catch (err: any) {
             Logger.error(`Ocurrio un error al obtener la vacante publica: ${normalizeError(err)}`);
-            if (err.message === 'NOT_FOUND') {
+            if (err.message === APP_ERROR.NOT_FOUND) {
                 return sendError(res, 404, 'Vacante no encontrada');
             }
             return sendError(res, 500, 'Ocurrio un error al obtener la vacante');

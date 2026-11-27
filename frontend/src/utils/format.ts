@@ -12,3 +12,12 @@ export function formatDateTime(dateString: string) {
         minute: "2-digit",
     }).format(new Date(dateString));
 }
+
+export function formatSalaryRange(min: number | null | undefined, max: number | null | undefined) {
+    const minLabel = formatCurrency(min);
+    const maxLabel = formatCurrency(max);
+    if (minLabel && maxLabel) return `${minLabel} - ${maxLabel}`;
+    if (minLabel) return `Desde ${minLabel}`;
+    if (maxLabel) return `Hasta ${maxLabel}`;
+    return "Sueldo a convenir";
+}

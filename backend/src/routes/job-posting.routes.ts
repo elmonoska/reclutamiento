@@ -1,14 +1,17 @@
 import { Router } from "express";
 import JobPostingController from "../controllers/job-posting.controller";
-import { validateCookieToken } from "../middlewares/auth.middleware";
+import JobApplicationController from "../controllers/job-application.controller";
+import { requireRole, validateCookieToken } from "../middlewares/auth.middleware";
 import { handleInputErrors } from "../middlewares/index.middleware";
 import { authorizeJobPostingOwner } from "../middlewares/job-posting.middleware";
 import { body, param } from "express-validator";
 import sanitize from "sanitize-html";
+import { USER_ROLES } from "../constants/auth.constants";
+import { MANUAL_APPLICATION_STATUSES } from "../constants/job-application.constants";
 
 const jobPostingRouter: Router = Router();
 
-jobPostingRouter.use(validateCookieToken);
+jobPostingRouter.use(validateCookieToken, requireRole(USER_ROLES.RECRUITER, USER_ROLES.ADMIN));
 
 jobPostingRouter.get(
     '/catalogs',
@@ -16,7 +19,7 @@ jobPostingRouter.get(
 );
 
 jobPostingRouter.post(
-    '/create',
+    '/',
     body('title').notEmpty().withMessage('El titulo es requerido'),
     body('description').notEmpty().withMessage('La descripcion es requerida').customSanitizer(value => sanitize(value)),
     body('requirements').notEmpty().withMessage('Los requisitos son requeridos').customSanitizer(value => sanitize(value)),
@@ -34,7 +37,7 @@ jobPostingRouter.post(
 );
 
 jobPostingRouter.get(
-    '/last-job-postings',
+    '/recent',
     JobPostingController.lastJobPostings
 );
 
@@ -46,7 +49,7 @@ jobPostingRouter.get(
 );
 
 jobPostingRouter.put(
-    '/:id/edit',
+    '/:id',
     param('id').isInt({ min: 1 }).withMessage('Id invalido').toInt(),
     handleInputErrors,
     authorizeJobPostingOwner,
@@ -71,8 +74,44 @@ jobPostingRouter.get('/',
     JobPostingController.getAllJobPostings
 );
 
+jobPostingRouter.get(
+    '/:id/applications',
+    param('id').isInt({ min: 1 }).withMessage('Id invalido').toInt(),
+    handleInputErrors,
+    authorizeJobPostingOwner,
+    JobApplicationController.getJobApplications
+);
+
+jobPostingRouter.get(
+    '/:id/applications/:applicationId',
+    param('id').isInt({ min: 1 }).withMessage('Id invalido').toInt(),
+    param('applicationId').isInt({ min: 1 }).withMessage('Id invalido').toInt(),
+    handleInputErrors,
+    authorizeJobPostingOwner,
+    JobApplicationController.getJobApplicationDetail
+);
+
+jobPostingRouter.get(
+    '/:id/applications/:applicationId/resume-url',
+    param('id').isInt({ min: 1 }).withMessage('Id invalido').toInt(),
+    param('applicationId').isInt({ min: 1 }).withMessage('Id invalido').toInt(),
+    handleInputErrors,
+    authorizeJobPostingOwner,
+    JobApplicationController.getApplicationResumeUrl
+);
+
 jobPostingRouter.patch(
-    '/:id/delete',
+    '/:id/applications/:applicationId/status',
+    param('id').isInt({ min: 1 }).withMessage('Id invalido').toInt(),
+    param('applicationId').isInt({ min: 1 }).withMessage('Id invalido').toInt(),
+    body('status').isIn(MANUAL_APPLICATION_STATUSES).withMessage('Estatus invalido'),
+    handleInputErrors,
+    authorizeJobPostingOwner,
+    JobApplicationController.updateStatus
+);
+
+jobPostingRouter.delete(
+    '/:id',
     param('id').isInt({ min: 1 }).withMessage('Id invalido').toInt(),
     handleInputErrors,
     authorizeJobPostingOwner,

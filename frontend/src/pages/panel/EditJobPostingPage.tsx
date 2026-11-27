@@ -1,11 +1,12 @@
-﻿import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import type { TEditJobPostingForm  } from "../../types/form.type";
 import { editJobPosting, getJobPostingById } from "../../api/job-posting";
 import RichTextEditor from "../../components/RichTextEditor";
 import { toast } from "react-toastify";
-import { Link, useNavigate, useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { usePanel } from "../../contexts/PanelContext";
 import { useEffect, useState } from "react";
+import PanelBreadcrumbs from "../../components/PanelBreadcrumbs";
 
 const initialValues: TEditJobPostingForm = {
     title: "",
@@ -25,6 +26,7 @@ const initialValues: TEditJobPostingForm = {
 
 export default function EditJobPostingPage() {
     const [isLoading, setIsLoading] = useState(true);
+    const [jobTitle, setJobTitle] = useState("");
     const navigate = useNavigate();
     const { id } = useParams();
     const { catalogs } = usePanel();
@@ -63,6 +65,7 @@ export default function EditJobPostingPage() {
                     return;
                 }
                 const jobPosting = res.data.jobPosting;
+                setJobTitle(jobPosting.title);
                 reset({
                     title: jobPosting.title,
                     description: jobPosting.description,
@@ -79,7 +82,7 @@ export default function EditJobPostingPage() {
                     id_work_model: jobPosting.id_work_model
                 });
             } catch (err) {
-                console.log(`Error al cargar la vacante: ${err}`)
+                console.error(err);
                 toast.error('No se pudo cargar la informacion de la vacante');
             } finally {
                 setIsLoading(false);
@@ -94,9 +97,7 @@ export default function EditJobPostingPage() {
 
     return (
         <div className="py-8 px-4 max-w-4xl mx-auto space-y-6">
-            <Link to="/panel" className="inline-block text-sm font-medium text-orange-600 hover:text-orange-700 transition">
-                &larr; Volver al panel
-            </Link>
+            <PanelBreadcrumbs items={[{ label: "Panel", to: "/panel" }, { label: "Vacantes", to: "/panel/vacantes" }, { label: jobTitle || "Detalle", to: `/panel/vacantes/${id}` }, { label: "Editar" }]} />
 
             <div className="w-full">
                 <div className="mb-8">
@@ -118,7 +119,7 @@ export default function EditJobPostingPage() {
                                 {...register("title", {
                                     required: "El título es obligatorio",
                                 })}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                             />
                             {errors.title && (
                                 <p className="mt-1 text-sm text-red-500">{errors.title.message}</p>
@@ -217,7 +218,7 @@ export default function EditJobPostingPage() {
                                     {...register("salary_min", {
                                         setValueAs: (value) => (value === '' ? null : parseInt(value, 10))
                                     })}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                                 />
                             </div>
 
@@ -233,11 +234,12 @@ export default function EditJobPostingPage() {
                                     {...register("salary_max", {
                                         setValueAs: (value) => (value === '' ? null : parseInt(value, 10))
                                     })}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                                 />
                             </div>
                         </div>
 
+                        {/* estatus de la vacante */}
                         <div>
                             <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-2">
                                 Estatus de la vacante
@@ -247,7 +249,7 @@ export default function EditJobPostingPage() {
                                 {...register("status", {
                                     required: "El estatus es obligatorio",
                                 })}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100 bg-white"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-white"
                             >
                                 <option value="">Selecciona un estatus</option>
                                 <option value="published">Publicada</option>
@@ -268,7 +270,7 @@ export default function EditJobPostingPage() {
                                         required: "El estado es obligatorio",
                                         valueAsNumber: true
                                     })}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100 bg-white"
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-white"
                                 >
                                     <option value="">Selecciona un estado</option>
                                     {catalogs.states.map(state => <option key={state.id} value={state.id}>{state.name}</option>)}
@@ -289,7 +291,7 @@ export default function EditJobPostingPage() {
                                         required: "La categoria de puesto es obligatoria",
                                         valueAsNumber: true
                                     })}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100 bg-white"
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-white"
                                 >
                                     <option value="">Selecciona una categoria</option>
                                     {catalogs.jobCategories.map(category => <option key={category.id} value={category.id}>{category.name}</option>)}
@@ -310,7 +312,7 @@ export default function EditJobPostingPage() {
                                         required: "El tipo de empleo es obligatorio",
                                         valueAsNumber: true
                                     })}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100 bg-white"
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-white"
                                 >
                                     <option value="">Selecciona un tipo de empleo</option>
                                     {catalogs.employmentTypes.map(employment => <option key={employment.id} value={employment.id}>{employment.name}</option>)}
@@ -331,7 +333,7 @@ export default function EditJobPostingPage() {
                                         required: "El nivel de experiencia es obligatorio",
                                         valueAsNumber: true
                                     })}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100 bg-white"
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-white"
                                 >
                                     <option value="">Selecciona un nivel de experiencia</option>
                                     {catalogs.experienceLevels.map(experience => <option key={experience.id} value={experience.id}>{experience.name}</option>)}
@@ -352,7 +354,7 @@ export default function EditJobPostingPage() {
                                         required: "El nivel educativo es obligatorio",
                                         valueAsNumber: true
                                     })}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100 bg-white"
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-white"
                                 >
                                     <option value="">Selecciona un nivel educativo</option>
                                     {catalogs.educationLevels.map(educationLevel => <option key={educationLevel.id} value={educationLevel.id}>{educationLevel.name}</option>)}
@@ -373,7 +375,7 @@ export default function EditJobPostingPage() {
                                         required: "La modalidad de trabajo es obligatoria",
                                         valueAsNumber: true
                                     })}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100 bg-white"
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-white"
                                 >
                                     <option value="">Selecciona una modalidad de trabajo</option>
                                     {catalogs.workModels.map(workModel => <option key={workModel.id} value={workModel.id}>{workModel.name}</option>)}
@@ -384,10 +386,11 @@ export default function EditJobPostingPage() {
                             </div>
                         </div>
 
+                        {/* boton editar vacante */}
                         <button
                             type="submit"
                             disabled={!isValid}
-                            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition duration-200 shadow-sm cursor-pointer disabled:bg-orange-200 disabled:cursor-not-allowed disabled:text-white"
+                            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition duration-200 shadow-sm cursor-pointer disabled:bg-blue-200 disabled:cursor-not-allowed disabled:text-white"
                         >
                             Editar vacante
                         </button>

@@ -34,7 +34,7 @@ export function AuthProvider({ children }: TAuthProvider) {
             }
         } catch (err) {
             console.error(err);
-            setUser(null);
+            setUser(null)
             setIsAuthenticated(false);
         } finally {
             setIsLoading(false);

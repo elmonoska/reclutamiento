@@ -1,16 +1,20 @@
 import {Request, Response} from 'express'
 import Logger from '../utils/logger.utils'
 import { normalizeError, sendError, sendSuccess } from '../helpers/response.helper';
-import { TRequestWithUser, TRequestWithUserAndToken } from '../types/auth';
+import { TRequestWithUser, TRequestWithUserAndToken } from '../types/auth.type';
 import AuthService from '../services/auth.service';
-import { NODE_ENV, TOKEN_DURATION_MINUTES } from '../constants';
+import { USER_ROLES } from '../constants/auth.constants';
+import type { TUserRoleName } from '../types/auth.type';
+import { APP_ERROR } from '../constants/errors.constants';
+import { NODE_ENV, TOKEN_DURATION_MINUTES } from '../constants/index.constants';
 import { getExpirationTime } from '../utils/time.utils';
 
 export default class AuthController {
     static async createAccount(req: Request, res: Response) {
         try {
             const { name, email, password } = req.body;
-            await AuthService.createUser(name, email, password);
+            const roleName = ((req as any).roleName as TUserRoleName) || USER_ROLES.RECRUITER;
+            await AuthService.createUser(name, email, password, roleName);
 
             return sendSuccess(res, 201, 'Cuenta creada exitosamente, revisa tu email para confirmarla');
         } catch (err) {
@@ -49,10 +53,10 @@ export default class AuthController {
         } catch (err) {
             Logger.error(`Ocurrio un error al ingresar a la cuenta: ${normalizeError(err)}`);
             if (err instanceof Error) {
-                if (err.message === 'UNCONFIRMED_ACCOUNT') {
+                if (err.message === APP_ERROR.UNCONFIRMED_ACCOUNT) {
                     return sendError(res, 403, 'La cuenta no ha sido confirmada, se ha enviado un email para hacerlo');
                 }
-                if (err.message === 'INVALID_CREDENTIALS') {
+                if (err.message === APP_ERROR.INVALID_CREDENTIALS) {
                     return sendError(res, 401, 'Correo o contraseña invalidos');
                 }
             }
@@ -101,7 +105,20 @@ export default class AuthController {
 
     static async verifySession(req: TRequestWithUser, res: Response) {
         try {
-            return sendSuccess(res, 200, 'Sesion valida', {user: req.user});
+            const user = req.user!;
+            return sendSuccess(res, 200, 'Sesion valida', {
+                user: {
+                    id_user: user.id_user,
+                    uuid_user: user.uuid_user,
+                    name: user.name,
+                    email: user.email,
+                    confirmed: user.confirmed,
+                    id_role: user.id_role,
+                    role: user.role ? { id_role: user.role.id_role, name: user.role.name } : null,
+                    createdAt: (user as any).createdAt,
+                    updatedAt: (user as any).updatedAt,
+                }
+            });
         } catch (err) {
             Logger.error(`Ocurrio un error al verificar la sesion: ${normalizeError(err)}`);
             return sendError(res, 500, 'Ocurrio un error al verificar la sesion');

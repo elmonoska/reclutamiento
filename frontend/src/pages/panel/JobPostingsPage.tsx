@@ -5,6 +5,9 @@ import { FaTrash } from "react-icons/fa";
 import { deleteJobPosting, getJobPostings } from "../../api/job-posting";
 import type { TJobPosting } from "../../types/api.type";
 import { formatDateTime } from "../../utils/format";
+import PanelBreadcrumbs from "../../components/PanelBreadcrumbs";
+import { JOB_POSTING_STATUS_FILTER_OPTIONS } from "../../constants/job-posting";
+import { getJobPostingStatusLabel, getJobPostingStatusStyle } from "../../utils/job-posting";
 
 export default function JobPostingsPage() {
     const [jobPostings, setJobPostings] = useState<TJobPosting[]>([]);
@@ -57,9 +60,7 @@ export default function JobPostingsPage() {
 
     return (
         <div className="py-8 px-4 space-y-6 max-w-6xl mx-auto">
-            <Link to="/panel" className="inline-block text-sm font-medium text-orange-600 hover:text-orange-700 transition">
-                &larr; Volver al panel
-            </Link>
+            <PanelBreadcrumbs items={[{ label: "Panel", to: "/panel" }, { label: "Vacantes" }]} />
 
             <div className="flex items-center justify-between">
                 <div>
@@ -68,7 +69,7 @@ export default function JobPostingsPage() {
                 </div>
                 <Link
                     to="/panel/vacantes/crear"
-                    className="inline-flex items-center gap-2 text-sm bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2.5 px-5 rounded-lg transition duration-200 shadow-sm cursor-pointer"
+                    className="inline-flex items-center gap-2 text-sm bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2.5 px-5 rounded-lg transition duration-200 shadow-sm cursor-pointer"
                 >
                     + Crear vacante
                 </Link>
@@ -76,6 +77,7 @@ export default function JobPostingsPage() {
 
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* buscar por título */}
                     <div>
                         <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">Buscar por título</label>
                         <input
@@ -84,30 +86,30 @@ export default function JobPostingsPage() {
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             placeholder="Ej. Desarrollador Frontend"
-                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                         />
                     </div>
+                    {/* estatus */}
                     <div>
                         <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">Estatus</label>
                         <select
                             id="status"
                             value={status}
                             onChange={(e) => setStatus(e.target.value)}
-                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100 bg-white"
+                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-white"
                         >
                             <option value="">Todos</option>
-                            <option value="published">Publicadas</option>
-                            <option value="closed">Cerradas</option>
-                            <option value="deleted">Eliminadas</option>
+                            {JOB_POSTING_STATUS_FILTER_OPTIONS.map((opt) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
                         </select>
                     </div>
+                    {/* registros por página */}
                     <div>
                         <label htmlFor="limit" className="block text-sm font-medium text-gray-700 mb-1">Registros por página</label>
                         <select
                             id="limit"
                             value={limit}
                             onChange={(e) => setLimit(Number(e.target.value))}
-                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100 bg-white"
+                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-white"
                         >
                             {[10, 20, 30, 50, 100].map((n) => <option key={n} value={n}>{n}</option>)}
                         </select>
@@ -126,50 +128,59 @@ export default function JobPostingsPage() {
                             <thead className="bg-gray-50">
                                 <tr>
                                     <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">ID</th>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Título</th>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Vacante</th>
                                     <th className="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Estatus</th>
+                                    <th className="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Postulaciones</th>
                                     <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Creada</th>
-                                    <th className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Acciones</th>
+                                    <th className="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-100">
                                 {jobPostings.map((job) => {
-                                    const isDeleted = !!job.deletedAt;
-                                    const statusStyles = isDeleted
-                                        ? "bg-red-50 text-red-600 border-red-100"
-                                        : job.status === "published"
-                                            ? "bg-green-50 text-green-700 border-green-200"
-                                            : "bg-amber-50 text-amber-700 border-amber-200";
-                                    const statusLabel = isDeleted ? "Eliminada" : job.status === "published" ? "Publicada" : "Cerrada";
+                                    const isDeleted = !!(job.deletedAt ?? job.deleted_at);
+                                    const statusLabel = getJobPostingStatusLabel(job.status, job.deletedAt ?? job.deleted_at);
+                                    const statusStyles = getJobPostingStatusStyle(job.status, job.deletedAt ?? job.deleted_at);
 
                                     return (
                                         <tr key={job.id_job_posting} className={`transition-colors ${isDeleted ? "bg-gray-50/60 text-gray-400" : "hover:bg-gray-50/80"}`}>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{job.id_job_posting}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                <Link
-                                                    to={`/panel/vacantes/${job.id_job_posting}`}
-                                                    className={isDeleted ? "text-gray-500 hover:text-orange-600 transition-colors" : "text-gray-900 hover:text-orange-600 transition-colors"}
-                                                >
-                                                    {job.title}
-                                                </Link>
+                                            <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${isDeleted ? "text-gray-500" : "text-gray-900"}`}>
+                                                {job.title}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-center">
                                                 <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-medium border min-w-24 ${statusStyles}`}>
                                                     {statusLabel}
                                                 </span>
                                             </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-700">
+                                                {Number(job.applications_count ?? 0)}
+                                            </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDateTime(job.createdAt)}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handleDelete(job.id_job_posting)}
-                                                    disabled={isDeleted}
-                                                    className="inline-flex items-center justify-center p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
-                                                    aria-label={`Eliminar vacante ${job.title}`}
-                                                    title="Eliminar"
-                                                >
-                                                    <FaTrash />
-                                                </button>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                                <div className="flex items-center justify-center gap-3">
+                                                    <Link
+                                                        to={`/panel/vacantes/${job.id_job_posting}`}
+                                                        className="font-medium text-blue-500 hover:text-blue-600 transition-colors"
+                                                    >
+                                                        Ver detalle
+                                                    </Link>
+                                                    <Link
+                                                        to={`/panel/vacantes/${job.id_job_posting}/candidatos`}
+                                                        className="font-medium text-blue-500 hover:text-blue-600 transition-colors"
+                                                    >
+                                                        Ver candidatos
+                                                    </Link>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleDelete(job.id_job_posting)}
+                                                        disabled={isDeleted}
+                                                        className="inline-flex items-center justify-center p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                                                        aria-label={`Eliminar vacante ${job.title}`}
+                                                        title="Eliminar"
+                                                    >
+                                                        <FaTrash />
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     );
@@ -180,7 +191,7 @@ export default function JobPostingsPage() {
                 )}
             </div>
 
-            {totalPages > 1 && (
+            {totalPages > 0 && (
                 <div className="flex items-center justify-center gap-2">
                     <button
                         type="button"
@@ -195,8 +206,8 @@ export default function JobPostingsPage() {
                             key={p}
                             type="button"
                             onClick={() => loadJobPostings(p)}
-                            disabled={isLoading}
-                            className={`px-3 py-2 text-sm rounded-lg border cursor-pointer disabled:cursor-not-allowed ${p === page ? "bg-orange-500 text-white border-orange-500" : "border-gray-300 hover:bg-gray-50"}`}
+                            disabled={isLoading || p === page}
+                            className={`px-3 py-2 text-sm rounded-lg border cursor-pointer disabled:cursor-not-allowed ${p === page ? "bg-blue-500 text-white border-blue-500" : "border-gray-300 hover:bg-gray-50"}`}
                         >
                             {p}
                         </button>

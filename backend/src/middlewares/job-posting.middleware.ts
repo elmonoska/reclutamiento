@@ -1,5 +1,5 @@
-﻿import { Response, NextFunction } from 'express';
-import { TRequestWithJobPosting } from '../types/auth';
+import { Response, NextFunction } from 'express';
+import { TRequestWithJobPosting } from '../types/auth.type';
 import JobPosting from '../models/job-posting.model';
 import Logger from '../utils/logger.utils';
 import { normalizeError, sendError } from '../helpers/response.helper';

@@ -31,3 +31,18 @@ export type TJobPostingForm = {
 export type TEditJobPostingForm = TJobPostingForm & {
     status: 'published' | 'closed' | '';
 };
+
+export type TCandidateProfileForm = {
+    phone: string;
+    headline: string;
+    summary: string;
+    id_state: number | '';
+    id_education_level: number | '';
+    id_experience_level: number | '';
+    id_work_model: number | '';
+    expected_salary: number | '';
+    linkedin_url: string;
+    github_url: string;
+    portfolio_url: string;
+    resume: FileList;
+};

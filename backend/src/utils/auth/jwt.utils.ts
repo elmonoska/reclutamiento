@@ -1,10 +1,9 @@
-import jwt from 'jsonwebtoken';
-import { JWT_SECRET, TOKEN_DURATION_MINUTES } from '../../constants';
+﻿import jwt from 'jsonwebtoken';
+import { JWT_SECRET, TOKEN_DURATION_MINUTES } from '../../constants/index.constants';
 import { getExpirationTime } from '../time.utils';
 
-export function generateJWT(uuid_user: string) {
+export function generateJWT(payload: { uuid_user: string; id_role?: number | null; role?: string }) {
     const { jwtString } = getExpirationTime(TOKEN_DURATION_MINUTES);
-    const payload = { uuid_user };
     return jwt.sign(payload, JWT_SECRET, {expiresIn: jwtString});
 }
 

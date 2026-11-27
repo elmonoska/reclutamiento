@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router"; 
 import { getLastJobPostings } from "../../api/job-posting";
 import type { TJobPosting } from "../../types/api.type";
-import { formatCurrency, formatDateTime } from "../../utils/format";
+import { formatDateTime, formatSalaryRange } from "../../utils/format";
 import { toast } from "react-toastify";
+import { getJobPostingStatusLabel, getJobPostingStatusStyle } from "../../utils/job-posting";
 
 export default function PanelIndexPage() {
     const [lastJobPostings, setLastJobPostings] = useState<TJobPosting[]>([]);
@@ -16,7 +17,7 @@ export default function PanelIndexPage() {
                 if (!res.success) toast.error(res.message);
                 if (res.success) {
                     setLastJobPostings(res.data.lastJobPostings);
-                }   
+                }
             } catch (err) {
                 console.error(err);
                 toast.error(res.message);
@@ -39,7 +40,7 @@ export default function PanelIndexPage() {
                 </div>
                 <Link
                     to="/panel/vacantes/crear"
-                    className="inline-flex items-center gap-2 text-sm bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2.5 px-5 rounded-lg transition duration-200 shadow-sm cursor-pointer"
+                    className="inline-flex items-center gap-2 text-sm bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2.5 px-5 rounded-lg transition duration-200 shadow-sm cursor-pointer"
                 >
                     + Crear vacante
                 </Link>
@@ -48,7 +49,7 @@ export default function PanelIndexPage() {
             <section className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
                 <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200 bg-gray-50/50">
                     <h3 className="text-lg font-semibold text-gray-900">Últimas publicadas</h3>
-                    <Link to="/panel/vacantes" className="text-sm font-medium text-orange-600 hover:text-orange-700 transition">
+                    <Link to="/panel/vacantes" className="text-sm font-medium text-blue-500 hover:text-blue-600 transition">
                         Ver todas &rarr;
                     </Link>
                 </div>
@@ -60,37 +61,41 @@ export default function PanelIndexPage() {
                 ) : (
                     <ul className="divide-y divide-gray-100">
                         {lastJobPostings.map((job) => {
-                            const statusStyles = job?.status === "published"
-                                    ? "bg-green-50 text-green-700 border-green-200"
-                                    : "bg-gray-100 text-gray-700 border-gray-200";
+                            const statusLabel = getJobPostingStatusLabel(job.status, job.deletedAt ?? job.deleted_at);
+                            const statusStyles = getJobPostingStatusStyle(job.status, job.deletedAt ?? job.deleted_at);
                                 return (
                                     <li key={job.id_job_posting} className="group flex flex-col sm:flex-row sm:items-center justify-between px-6 py-4 hover:bg-gray-50/80 transition-colors">
                                         <div className="flex items-center gap-4">
                                             <div className="flex flex-col gap-0.5">
-                                                <Link 
-                                                    to={`/panel/vacantes/${job.id_job_posting}`} 
-                                                    className="font-semibold text-gray-900 hover:text-orange-600 transition-colors text-base"
-                                                >
+                                                <p className="font-semibold text-gray-900 text-base">
                                                     <span className="text-gray-400 font-normal mr-2">#{job.id_job_posting}</span>
                                                     {job.title}
-                                                </Link>
+                                                </p>
                                                 
                                                 <div className="text-sm text-gray-500 flex items-center flex-wrap gap-x-2">
                                                     <span>{formatDateTime(job.createdAt)}</span>
                                                     <span className="text-gray-300">•</span>
                                                     <span className="font-medium text-gray-600">
-                                                        {job.salary_min && job.salary_max 
-                                                            ? `${formatCurrency(job.salary_min)} - ${formatCurrency(job.salary_max)}` 
-                                                            : 'Sueldo a convenir'}
+                                                        {formatSalaryRange(job.salary_min, job.salary_max)}
                                                     </span>
+                                                    <span className="text-gray-300">•</span>
+                                                    <span>{Number(job.applications_count ?? 0)} postulaciones</span>
                                                 </div>
                                             </div>
                                         </div>
                                         
-                                        <div className="mt-3 sm:mt-0 shrink-0">
-                                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border capitalize ${statusStyles}`}>
-                                                {job.status === "published" ? "Publicada" : "Cerrada"}
+                                        <div className="mt-3 sm:mt-0 shrink-0 flex items-center gap-4">
+                                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${statusStyles}`}>
+                                                {statusLabel}
                                             </span>
+                                            <div className="flex items-center gap-3">
+                                                <Link to={`/panel/vacantes/${job.id_job_posting}`} className="text-sm font-medium text-blue-500 hover:text-blue-600 transition">
+                                                    Ver detalle
+                                                </Link>
+                                                <Link to={`/panel/vacantes/${job.id_job_posting}/candidatos`} className="text-sm font-medium text-blue-500 hover:text-blue-600 transition">
+                                                    Ver candidatos
+                                                </Link>
+                                            </div>
                                         </div>
                                     </li>
                                 )

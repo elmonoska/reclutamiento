@@ -6,7 +6,7 @@ import { useAuth } from "../contexts/AuthContext";
 
 export default function NavbarAuth() {
     const navigate = useNavigate();
-    const { checkAuth } = useAuth();
+    const { checkAuth, user } = useAuth();
 
     async function closeSession() {
         const res = await logout();
@@ -29,7 +29,19 @@ export default function NavbarAuth() {
 
                 <div className="flex items-center gap-4">
                     <ul className="flex items-center gap-4">
-                        <Link to="/panel">Panel</Link>
+                        {user?.role?.name === 'candidate' ? (
+                            <>
+                                <Link to="/" className="hover:text-blue-600 transition-colors">Explorar vacantes</Link>
+                                <Link to="/candidato" className="hover:text-blue-600 transition-colors">Mi perfil</Link>
+                                <Link to="/candidato/mis-postulaciones" className="hover:text-blue-600 transition-colors">Mis postulaciones</Link>
+                                <Link to="/candidato/cuenta" className="hover:text-blue-600 transition-colors">Cuenta</Link>
+                            </>
+                        ) : (
+                            <>
+                                <Link to="/panel" className="hover:text-blue-600 transition-colors">Panel</Link>
+                                <Link to="/panel/cuenta" className="hover:text-blue-600 transition-colors">Cuenta</Link>
+                            </>
+                        )}
                         <button type="button" className="cursor-pointer" onClick={closeSession}>Cerrar sesion</button>
                     </ul>
                 </div>

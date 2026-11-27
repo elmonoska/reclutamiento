@@ -1,4 +1,4 @@
-import { FRONTEND_URL } from "../constants";
+﻿import { FRONTEND_URL } from "../constants/index.constants";
 import { sendEmail } from "../lib/mail/nodemailer";
 
 export default class EmailService {
@@ -29,6 +29,22 @@ export default class EmailService {
         await sendEmail(
             email,
             'Confirmacion de restablecimiento de contraseña',
+            undefined,
+            template
+        );
+    }
+
+    static async sendPasswordChange(email: string, token: number, confirmUrl: string) {
+        const template = `
+            <h1>Confirma el cambio de contraseña</h1>
+            <p>Solicitaste cambiar la contraseña de tu cuenta. Usa este token para confirmar el cambio en el siguiente enlace:</p>
+            <a href="${confirmUrl}" target="_blank">Confirmar cambio de contraseña</a>
+            <h2>Token: <strong>${token}</strong></h2>
+            <p>Si no solicitaste este cambio, ignora este correo.</p>
+        `;
+        await sendEmail(
+            email,
+            'Confirmacion de cambio de contraseña',
             undefined,
             template
         );

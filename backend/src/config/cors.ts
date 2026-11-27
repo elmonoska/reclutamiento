@@ -1,5 +1,5 @@
-import { CorsOptions } from "cors";
-import { FRONTEND_URL, NODE_ENV } from "../constants";
+﻿import { CorsOptions } from "cors";
+import { FRONTEND_URL, NODE_ENV } from "../constants/index.constants";
 
 export const corsOptions: CorsOptions = {
     origin: function(origin, callback) {

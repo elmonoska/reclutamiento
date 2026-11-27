@@ -1,10 +1,11 @@
-import { AutoIncrement, BelongsTo, Column, DataType, Default, ForeignKey, Model, PrimaryKey, Table } from "sequelize-typescript";
+import { AutoIncrement, BelongsTo, Column, DataType, Default, ForeignKey, HasMany, Model, PrimaryKey, Table } from "sequelize-typescript";
 import CatEmploymentType from "./catalogs/cat-employment-type.model";
 import CatExperienceLevel from "./catalogs/cat-experience-level.model";
 import CatEducationLevel from "./catalogs/cat-education-level.model";
 import CatWorkModel from "./catalogs/cat-work-model.model";
 import CatState from "./catalogs/cat-state.model";
 import User from "./user.model";
+import JobApplication from "./job-application.model";
 import CatJobCategory from "./catalogs/cat-job-category.model";
 
 @Table({
@@ -139,4 +140,7 @@ export default class JobPosting extends Model {
 
     @BelongsTo(() => CatWorkModel)
     declare workModel: CatWorkModel
+
+    @HasMany(() => JobApplication)
+    declare jobApplications: JobApplication[]
 }

@@ -75,10 +75,10 @@ export default function ConfirmAccountPage() {
                             />
                         </div>
 
-                        {/* boton confirmar */}
+                        {/* boton confirmar cuenta */}
                         <button
                             type="submit"
-                            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition duration-200 shadow-sm"
+                            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition duration-200 shadow-sm"
                         >
                             Confirmar cuenta
                         </button>

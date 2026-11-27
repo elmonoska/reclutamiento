@@ -1,5 +1,5 @@
-import nodemailer from "nodemailer";
-import { NODEMAILER_HOST, NODEMAILER_PASS, NODEMAILER_PORT, NODEMAILER_SENDER, NODEMAILER_USER } from "../../constants";
+﻿import nodemailer from "nodemailer";
+import { NODEMAILER_HOST, NODEMAILER_PASS, NODEMAILER_PORT, NODEMAILER_SENDER, NODEMAILER_USER } from "../../constants/index.constants";
 import { normalizeError } from "../../helpers/response.helper";
 
 const transport = nodemailer.createTransport({

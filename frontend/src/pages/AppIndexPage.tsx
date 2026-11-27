@@ -1,25 +1,19 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import { getPublicCatalogs, getPublicJobPostings } from "../api/job-posting";
-import type { TApiResponseCatalogs, TCatalog, TJobPosting } from "../types/api.type";
-import { formatCurrency, formatDateTime } from "../utils/format";
-
-const emptyCatalogs: TApiResponseCatalogs = {
-    educationLevels: [],
-    employmentTypes: [],
-    experienceLevels: [],
-    jobCategories: [],
-    states: [],
-    workModels: []
-};
-
-function getCatalogName(items: TCatalog[], id: number) {
-    return items.find((item) => item.id === id)?.name ?? `ID ${id}`;
-}
+import { applyToJob, getMyApplicationByJob } from "../api/candidate";
+import { useAuth } from "../contexts/AuthContext";
+import type { TApiResponseCatalogs, TJobPosting } from "../types/api.type";
+import { formatDateTime, formatSalaryRange } from "../utils/format";
+import { EMPTY_CATALOGS } from "../constants/catalog";
+import { getCatalogName } from "../utils/catalog";
 
 export default function AppIndexPage() {
+    const { isAuthenticated, user } = useAuth();
+    const navigate = useNavigate();
     const [jobPostings, setJobPostings] = useState<TJobPosting[]>([]);
-    const [catalogs, setCatalogs] = useState<TApiResponseCatalogs>(emptyCatalogs);
+    const [catalogs, setCatalogs] = useState<TApiResponseCatalogs>(EMPTY_CATALOGS);
     const [selectedJob, setSelectedJob] = useState<TJobPosting | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [page, setPage] = useState(1);
@@ -29,6 +23,10 @@ export default function AppIndexPage() {
     const [idEmploymentType, setIdEmploymentType] = useState<number | "">("");
     const [idState, setIdState] = useState<number | "">("");
     const [idWorkModel, setIdWorkModel] = useState<number | "">("");
+    const [idJobCategory, setIdJobCategory] = useState<number | "">("");
+    const [hasApplied, setHasApplied] = useState(false);
+    const [checkingApplication, setCheckingApplication] = useState(false);
+    const [applying, setApplying] = useState(false);
 
     useEffect(() => {
         const timeout = setTimeout(() => setDebouncedSearch(search.trim()), 1500);
@@ -45,7 +43,7 @@ export default function AppIndexPage() {
 
     useEffect(() => {
         setPage(1);
-    }, [debouncedSearch, idEmploymentType, idState, idWorkModel]);
+    }, [debouncedSearch, idEmploymentType, idState, idWorkModel, idJobCategory]);
 
     useEffect(() => {
         async function loadJobPostings() {
@@ -56,6 +54,7 @@ export default function AppIndexPage() {
                     id_employment_type: idEmploymentType,
                     id_state: idState,
                     id_work_model: idWorkModel,
+                    id_job_category: idJobCategory,
                 });
                 if (!res.success) {
                     toast.error(res.message);
@@ -77,16 +76,55 @@ export default function AppIndexPage() {
             }
         }
         loadJobPostings();
-    }, [page, debouncedSearch, idEmploymentType, idState, idWorkModel]);
+    }, [page, debouncedSearch, idEmploymentType, idState, idWorkModel, idJobCategory]);
+
+    useEffect(() => {
+        let active = true;
+        async function check() {
+            if (!selectedJob || !isAuthenticated || user?.role?.name !== 'candidate') {
+                if (active) { setHasApplied(false); setCheckingApplication(false); }
+                return;
+            }
+            setCheckingApplication(true);
+            const res = await getMyApplicationByJob(selectedJob.id_job_posting);
+            if (active) {
+                setHasApplied(res.success && !!res.data.application);
+                setCheckingApplication(false);
+            }
+        }
+        check();
+        return () => { active = false; };
+    }, [selectedJob?.id_job_posting, isAuthenticated, user?.role?.name]);
+
+    async function handleApply() {
+        if (!selectedJob) return;
+        if (!isAuthenticated) {
+            navigate('/auth/iniciar-sesion');
+            return;
+        }
+        if (user?.role?.name !== 'candidate') {
+            toast.info('Solo los candidatos pueden postularse');
+            return;
+        }
+        setApplying(true);
+        const res = await applyToJob(selectedJob.id_job_posting);
+        setApplying(false);
+        if (!res.success) {
+            toast.error(res.message);
+            if (res.message.toLowerCase().includes('completar tu perfil')) {
+                navigate('/candidato/completar-perfil');
+            }
+            if (res.message.toLowerCase().includes('ya te has postulado')) {
+                setHasApplied(true);
+            }
+            return;
+        }
+        setHasApplied(true);
+        toast.success(res.message);
+    }
 
     const salaryLabel = useMemo(() => {
-        if (!selectedJob) return "Sueldo a convenir";
-        const min = formatCurrency(selectedJob.salary_min);
-        const max = formatCurrency(selectedJob.salary_max);
-        if (min && max) return `${min} - ${max}`;
-        if (min) return `Desde ${min}`;
-        if (max) return `Hasta ${max}`;
-        return "Sueldo a convenir";
+        return formatSalaryRange(selectedJob?.salary_min, selectedJob?.salary_max);
     }, [selectedJob]);
 
     return (
@@ -96,6 +134,7 @@ export default function AppIndexPage() {
             </div>
 
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 mb-6 space-y-4">
+                {/* buscar por título */}
                 <div>
                     <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">Buscar por título</label>
                     <input
@@ -104,27 +143,38 @@ export default function AppIndexPage() {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Ej. Desarrollador"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                     />
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {/* área / categoría */}
+                    <div>
+                        <label htmlFor="jobCategory" className="block text-sm font-medium text-gray-700 mb-1">Área / categoría</label>
+                        <select id="jobCategory" value={idJobCategory} onChange={(e) => setIdJobCategory(e.target.value ? Number(e.target.value) : "")} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-white">
+                            <option value="">Todas</option>
+                            {catalogs.jobCategories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                        </select>
+                    </div>
+                    {/* tipo de empleo */}
                     <div>
                         <label htmlFor="employmentType" className="block text-sm font-medium text-gray-700 mb-1">Tipo de empleo</label>
-                        <select id="employmentType" value={idEmploymentType} onChange={(e) => setIdEmploymentType(e.target.value ? Number(e.target.value) : "")} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100 bg-white">
+                        <select id="employmentType" value={idEmploymentType} onChange={(e) => setIdEmploymentType(e.target.value ? Number(e.target.value) : "")} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-white">
                             <option value="">Todos</option>
                             {catalogs.employmentTypes.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                         </select>
                     </div>
+                    {/* estado */}
                     <div>
                         <label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-1">Estado</label>
-                        <select id="state" value={idState} onChange={(e) => setIdState(e.target.value ? Number(e.target.value) : "")} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100 bg-white">
+                        <select id="state" value={idState} onChange={(e) => setIdState(e.target.value ? Number(e.target.value) : "")} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-white">
                             <option value="">Todos</option>
                             {catalogs.states.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                         </select>
                     </div>
+                    {/* modalidad */}
                     <div>
                         <label htmlFor="workModel" className="block text-sm font-medium text-gray-700 mb-1">Modalidad</label>
-                        <select id="workModel" value={idWorkModel} onChange={(e) => setIdWorkModel(e.target.value ? Number(e.target.value) : "")} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100 bg-white">
+                        <select id="workModel" value={idWorkModel} onChange={(e) => setIdWorkModel(e.target.value ? Number(e.target.value) : "")} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-white">
                             <option value="">Todos</option>
                             {catalogs.workModels.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                         </select>
@@ -148,18 +198,16 @@ export default function AppIndexPage() {
                                             <button
                                                 type="button"
                                                 onClick={() => setSelectedJob(job)}
-                                                className={`w-full text-left px-5 py-4 transition-colors cursor-pointer ${selected ? "bg-orange-50 border-l-4 border-orange-500" : "hover:bg-gray-50 border-l-4 border-transparent"}`}
+                                                className={`w-full text-left px-5 py-4 transition-colors cursor-pointer ${selected ? "bg-blue-50 border-l-4 border-blue-500" : "hover:bg-gray-50 border-l-4 border-transparent"}`}
                                             >
-                                                <p className={`font-semibold ${selected ? "text-orange-700" : "text-gray-900"}`}>{job.title}</p>
+                                                <p className={`font-semibold ${selected ? "text-blue-700" : "text-gray-900"}`}>{job.title}</p>
                                                 <div className="text-xs text-gray-600 mt-2 space-y-0.5 font-medium">
                                                     <p>{getCatalogName(catalogs.employmentTypes, job.id_employment_type)}</p>
                                                     <p>{getCatalogName(catalogs.states, job.id_state)}</p>
                                                     <p>{getCatalogName(catalogs.workModels, job.id_work_model)}</p>
                                                 </div>
                                                 <p className="text-sm font-bold text-gray-700 mt-2">
-                                                    {job.salary_min && job.salary_max
-                                                        ? `${formatCurrency(job.salary_min)} - ${formatCurrency(job.salary_max)}`
-                                                        : "Sueldo a convenir"}
+                                                    {formatSalaryRange(job.salary_min, job.salary_max)}
                                                 </p>
                                             </button>
                                         </li>
@@ -169,7 +217,7 @@ export default function AppIndexPage() {
                         )}
                     </div>
 
-                    {totalPages > 1 && (
+                    {totalPages > 0 && (
                         <div className="flex items-center justify-center gap-2">
                             <button
                                 type="button"
@@ -184,8 +232,8 @@ export default function AppIndexPage() {
                                     key={p}
                                     type="button"
                                     onClick={() => setPage(p)}
-                                    disabled={isLoading}
-                                    className={`px-3 py-2 text-sm rounded-lg border cursor-pointer disabled:cursor-not-allowed ${p === page ? "bg-orange-500 text-white border-orange-500" : "border-gray-300 hover:bg-gray-50"}`}
+                                    disabled={isLoading || p === page}
+                                    className={`px-3 py-2 text-sm rounded-lg border cursor-pointer disabled:cursor-not-allowed ${p === page ? "bg-blue-500 text-white border-blue-500" : "border-gray-300 hover:bg-gray-50"}`}
                                 >
                                     {p}
                                 </button>
@@ -208,9 +256,21 @@ export default function AppIndexPage() {
                             <p className="text-gray-500">Selecciona una vacante para ver el detalle.</p>
                         ) : (
                             <div className="space-y-8">
-                                <div className="space-y-2">
-                                    <h2 className="text-2xl font-bold text-gray-900">{selectedJob.title}</h2>
-                                    <p className="text-gray-500">Publicado: {formatDateTime(selectedJob.createdAt)}</p>
+                                <div className="flex items-start justify-between gap-4">
+                                    <div className="space-y-2">
+                                        <h2 className="text-2xl font-bold text-gray-900">{selectedJob.title}</h2>
+                                        <p className="text-gray-500">Publicado: {formatDateTime(selectedJob.createdAt)}</p>
+                                    </div>
+                                    {(!isAuthenticated || user?.role?.name === 'candidate') && (
+                                        <button
+                                            type="button"
+                                            onClick={handleApply}
+                                            disabled={applying || checkingApplication || hasApplied}
+                                            className="shrink-0 px-5 py-2.5 text-sm font-semibold rounded-lg transition cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 bg-blue-500 hover:bg-blue-600 text-white"
+                                        >
+                                            {hasApplied ? 'Ya postulado' : applying ? 'Postulando...' : checkingApplication ? 'Verificando...' : 'Postularme'}
+                                        </button>
+                                    )}
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

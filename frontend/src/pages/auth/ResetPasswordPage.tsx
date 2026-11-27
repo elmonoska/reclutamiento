@@ -88,7 +88,7 @@ export default function ResetPasswordPage() {
                                         message: "Token invalido"
                                     }
                                 })}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                             />
 
                             {errors.token && (
@@ -120,13 +120,13 @@ export default function ResetPasswordPage() {
                                             message: "La contraseña debe tener al menos 6 caracteres"
                                         }
                                     })}
-                                    className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+                                    className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                                 />
 
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-orange-500 transition"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-500 transition"
                                     aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                                 >
                                     {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
@@ -161,13 +161,13 @@ export default function ResetPasswordPage() {
                                             valor === getValues("password") ||
                                             "Las contraseñas no coinciden"
                                     })}
-                                    className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+                                    className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                                 />
 
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-orange-500 transition"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-500 transition"
                                     aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                                 >
                                     {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
@@ -181,11 +181,11 @@ export default function ResetPasswordPage() {
                             )}
                         </div>
 
-                        {/* boton restablecer */}
+                        {/* boton restablecer contraseña */}
                         <button
                             type="submit"
                             disabled={!isValid}
-                            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition duration-200 shadow-sm cursor-pointer disabled:bg-orange-200 disabled:cursor-not-allowed disabled:text-white"
+                            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition duration-200 shadow-sm cursor-pointer disabled:bg-blue-200 disabled:cursor-not-allowed disabled:text-white"
                         >
                             Restablecer contraseña
                         </button>

@@ -3,11 +3,11 @@ import { handleInputErrors } from "../middlewares/index.middleware";
 import { body } from "express-validator";
 import { getUserByEmail, getUserByUuid, preventDuplicateEmail, requireUnconfirmedAccount, validateAuthTokenById, validateCookieToken } from "../middlewares/auth.middleware";
 import AuthController from "../controllers/auth.controller";
+import { USER_ROLES } from "../constants/auth.constants";
 
 const authRouter = Router();
 
-authRouter.post(
-    '/create-account',
+const createAccountValidators = [
     body('name').notEmpty().withMessage('El nombre es requerido'),
     body('email').notEmpty().withMessage('El email es requerido').isEmail().withMessage('Email no valido'),
     body('password').notEmpty().withMessage('La contraseña es requerida'),
@@ -19,6 +19,19 @@ authRouter.post(
     }),
     handleInputErrors,
     preventDuplicateEmail,
+];
+
+authRouter.post(
+    '/create-account',
+    ...createAccountValidators,
+    (req, _res, next) => { (req as any).roleName = USER_ROLES.RECRUITER; next(); },
+    AuthController.createAccount
+);
+
+authRouter.post(
+    '/register-candidate',
+    ...createAccountValidators,
+    (req, _res, next) => { (req as any).roleName = USER_ROLES.CANDIDATE; next(); },
     AuthController.createAccount
 );
 

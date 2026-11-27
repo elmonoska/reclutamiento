@@ -1,13 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router";
 import { getJobPostingById } from "../../api/job-posting";
-import type { TCatalog, TJobPosting } from "../../types/api.type";
-import { formatCurrency, formatDateTime } from "../../utils/format";
+import type { TJobPosting } from "../../types/api.type";
+import { formatDateTime, formatSalaryRange } from "../../utils/format";
+import { getCatalogName } from "../../utils/catalog";
 import { usePanel } from "../../contexts/PanelContext";
-
-function getCatalogName(items: TCatalog[], id: number) {
-    return items.find((item) => item.id === id)?.name ?? `ID ${id}`;
-}
+import PanelBreadcrumbs from "../../components/PanelBreadcrumbs";
+import { getJobPostingStatusLabel, getJobPostingStatusStyle } from "../../utils/job-posting";
 
 export default function JobPostingDetailsPage() {
     const { id } = useParams();
@@ -40,19 +39,10 @@ export default function JobPostingDetailsPage() {
         load();
     }, [id]);
 
-    const salaryLabel = useMemo(() => {
-        if (!jobPosting) return "Sueldo a convenir";
-        const min = formatCurrency(jobPosting.salary_min);
-        const max = formatCurrency(jobPosting.salary_max);
-        if (min && max) return `${min} - ${max}`;
-        if (min) return `Desde ${min}`;
-        if (max) return `Hasta ${max}`;
-        return "Sueldo a convenir";
-    }, [jobPosting]);
+    const salaryLabel = useMemo(() => formatSalaryRange(jobPosting?.salary_min, jobPosting?.salary_max), [jobPosting]);
 
-    const statusStyles = jobPosting?.status === "published"
-        ? "bg-green-50 text-green-700 border-green-200"
-        : "bg-gray-100 text-gray-700 border-gray-200";
+    const statusLabel = getJobPostingStatusLabel(jobPosting?.status, jobPosting?.deletedAt ?? jobPosting?.deleted_at);
+    const statusStyles = getJobPostingStatusStyle(jobPosting?.status, jobPosting?.deletedAt ?? jobPosting?.deleted_at);
 
     if (isLoading) {
         return (
@@ -67,9 +57,7 @@ export default function JobPostingDetailsPage() {
     if (error || !jobPosting) {
         return (
             <div className="py-8 px-4 max-w-4xl mx-auto space-y-4">
-                <Link to="/panel" className="text-sm font-medium text-orange-600 hover:text-orange-700 transition">
-                    &larr; Volver al panel
-                </Link>
+                <PanelBreadcrumbs items={[{ label: "Panel", to: "/panel" }, { label: "Vacantes", to: "/panel/vacantes" }, { label: "Detalle" }]} />
                 <div className="bg-white border border-gray-100 rounded-2xl shadow-lg p-8">
                     <h1 className="text-2xl font-bold text-gray-900 mb-2">Detalle de vacante</h1>
                     <p className="text-red-500">{error || "Vacante no encontrada"}</p>
@@ -80,16 +68,22 @@ export default function JobPostingDetailsPage() {
 
     return (
         <div className="py-8 px-4 max-w-4xl mx-auto space-y-6">
-            <div className="flex items-center justify-between">
-                <Link to="/panel" className="text-sm font-medium text-orange-600 hover:text-orange-700 transition">
-                    &larr; Volver al panel
-                </Link>
-                <Link
-                    to={`/panel/vacantes/${jobPosting.id_job_posting}/editar`}
-                    className="inline-block text-sm bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2.5 px-5 rounded-lg transition duration-200 shadow-sm cursor-pointer"
-                >
-                    Editar
-                </Link>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <PanelBreadcrumbs items={[{ label: "Panel", to: "/panel" }, { label: "Vacantes", to: "/panel/vacantes" }, { label: jobPosting.title }]} />
+                <div className="flex items-center gap-2">
+                    <Link
+                        to={`/panel/vacantes/${jobPosting.id_job_posting}/candidatos`}
+                        className="inline-block text-sm bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-2.5 px-5 rounded-lg transition duration-200 cursor-pointer"
+                    >
+                        Ver candidatos
+                    </Link>
+                    <Link
+                        to={`/panel/vacantes/${jobPosting.id_job_posting}/editar`}
+                        className="inline-block text-sm bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2.5 px-5 rounded-lg transition duration-200 shadow-sm cursor-pointer"
+                    >
+                        Editar
+                    </Link>
+                </div>
             </div>
 
             <div>
@@ -103,8 +97,8 @@ export default function JobPostingDetailsPage() {
                         <p className="text-gray-500">Publicado: {formatDateTime(jobPosting.createdAt)}</p>
                         <p className="text-gray-500">Actualizado: {formatDateTime(jobPosting.updatedAt)}</p>
                     </div>
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border capitalize ${statusStyles}`}>
-                        {jobPosting.status === "published" ? "Publicada" : "Cerrada"}
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${statusStyles}`}>
+                        {statusLabel}
                     </span>
                 </div>
 
@@ -167,7 +161,7 @@ export default function JobPostingDetailsPage() {
 
                 <div className="pt-4 border-t border-gray-100 text-sm text-gray-500 space-y-1">
                     <p>ID de vacante: {jobPosting.id_job_posting}</p>
-                    <p>Creada por (ID usuario): {jobPosting.created_by}</p>
+                    <p>Creada por: {jobPosting.createdBy?.name || `Usuario #${jobPosting.created_by}`}</p>
                 </div>
             </div>
         </div>

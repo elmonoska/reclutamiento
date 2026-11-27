@@ -1,5 +1,9 @@
-import { AutoIncrement, Column, DataType, Default, DefaultScope, HasOne, Model, PrimaryKey, Scopes, Table } from "sequelize-typescript";
+import { AutoIncrement, BelongsTo, Column, DataType, Default, DefaultScope, ForeignKey, HasMany, HasOne, Model, PrimaryKey, Scopes, Table } from "sequelize-typescript";
 import AuthToken from "./auth-token.model";
+import Role from "./role.model";
+import CandidateProfile from "./candidate-profile.model";
+import CandidateResume from "./candidate-resume.model";
+import JobApplication from "./job-application.model";
 
 @DefaultScope(() => ({
     attributes: {exclude: ['password']}
@@ -9,7 +13,7 @@ import AuthToken from "./auth-token.model";
         attributes: {include: ['password']}
     },
     basic: {
-        attributes: ['uuid_user', 'id_user', 'name', 'email', 'confirmed']
+        attributes: ['uuid_user', 'id_user', 'name', 'email', 'confirmed', 'id_role']
     }
 }))
 @Table({
@@ -55,6 +59,25 @@ export default class User extends Model {
     })
     declare confirmed: boolean
 
+    @ForeignKey(() => Role)
+    @Column({
+        type: DataType.INTEGER,
+        allowNull: true
+    })
+    declare id_role: number | null
+
+    @BelongsTo(() => Role)
+    declare role: Role
+
     @HasOne(() => AuthToken)
     declare token: AuthToken[]
+
+    @HasOne(() => CandidateProfile)
+    declare candidateProfile: CandidateProfile
+
+    @HasOne(() => CandidateResume)
+    declare candidateResume: CandidateResume
+
+    @HasMany(() => JobApplication)
+    declare jobApplications: JobApplication[]
 }

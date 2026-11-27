@@ -3,11 +3,20 @@ import type { TApiResponse, TApiResponseLogin, TApiResponseVerify } from "../typ
 import type { TLoginForm, TSignupForm, TForgotPasswordForm, TResetPasswordForm, TConfirmAccountForm } from "../types/form.type";
 import { apiErrorHandler } from "../utils/apiErrorHandler";
 
-const PREFIX = '/auth';
+const PREFIX = 'auth';
 
 export async function createAccount(dataForm: TSignupForm): Promise<TApiResponse> {
     try {
-        const { data } = await api.post(`${PREFIX}/create-account`, dataForm)
+        const { data } = await api.post(`/${PREFIX}/create-account`, dataForm)
+        return data;
+    } catch (err) {
+        return { success: false, message: apiErrorHandler(err)};
+    }
+}
+
+export async function registerCandidate(dataForm: TSignupForm): Promise<TApiResponse> {
+    try {
+        const { data } = await api.post(`/${PREFIX}/register-candidate`, dataForm)
         return data;
     } catch (err) {
         return { success: false, message: apiErrorHandler(err)};
@@ -16,7 +25,7 @@ export async function createAccount(dataForm: TSignupForm): Promise<TApiResponse
 
 export async function confirmAccount(dataForm: TConfirmAccountForm): Promise<TApiResponse> {
     try {
-        const {data} = await api.post(`${PREFIX}/confirm-account`, {...dataForm});
+        const {data} = await api.post(`/${PREFIX}/confirm-account`, {...dataForm});
         return data;
     } catch (err) {
         return { success: false, message: apiErrorHandler(err) };
@@ -25,7 +34,7 @@ export async function confirmAccount(dataForm: TConfirmAccountForm): Promise<TAp
 
 export async function login(dataForm: TLoginForm): Promise<TApiResponse<TApiResponseLogin>> {
     try {
-        const { data } = await api.post(`${PREFIX}/login`, dataForm);
+        const { data } = await api.post(`/${PREFIX}/login`, dataForm);
         return data;
     } catch (err) {
         return { success: false, message: apiErrorHandler(err) };
@@ -34,7 +43,7 @@ export async function login(dataForm: TLoginForm): Promise<TApiResponse<TApiResp
 
 export async function forgotPassword(dataForm: TForgotPasswordForm): Promise<TApiResponse> {
     try {
-        const { data } = await api.post(`${PREFIX}/forgot-password`, dataForm);
+        const { data } = await api.post(`/${PREFIX}/forgot-password`, dataForm);
         return data;
     } catch (err) {
         return { success: false, message: apiErrorHandler(err) };
@@ -43,7 +52,7 @@ export async function forgotPassword(dataForm: TForgotPasswordForm): Promise<TAp
 
 export async function resetPassword(dataForm: TResetPasswordForm & { uuid_user: string }): Promise<TApiResponse> {
     try {
-        const { data } = await api.post(`${PREFIX}/reset-password`, dataForm);
+        const { data } = await api.post(`/${PREFIX}/reset-password`, dataForm);
         return data;
     } catch (err) {
         return { success: false, message: apiErrorHandler(err) };
@@ -52,7 +61,7 @@ export async function resetPassword(dataForm: TResetPasswordForm & { uuid_user: 
 
 export async function logout(): Promise<TApiResponse> {
     try {
-        const { data } = await api.post(`${PREFIX}/logout`);
+        const { data } = await api.post(`/${PREFIX}/logout`);
         return data;
     } catch (err) {
         return { success: false, message: apiErrorHandler(err) };
@@ -61,7 +70,7 @@ export async function logout(): Promise<TApiResponse> {
 
 export async function verifySesion(): Promise<TApiResponse<TApiResponseVerify>> {
     try {
-        const { data } = await api.get(`${PREFIX}/verify`);
+        const { data } = await api.get(`/${PREFIX}/verify`);
         return data;
     } catch (err) {
         return { success: false, message: apiErrorHandler(err) }

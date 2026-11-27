@@ -62,11 +62,11 @@ export default function RichTextEditor({ value, onChange, onBlur, placeholder }:
     }
 
     const buttonClass = (active: boolean) =>
-        `min-w-8 h-8 px-2 inline-flex items-center justify-center text-sm font-medium rounded transition select-none ${active ? "bg-orange-100 text-orange-600" : "text-gray-700 hover:bg-gray-100"
+        `min-w-8 h-8 px-2 inline-flex items-center justify-center text-sm font-medium rounded transition select-none ${active ? "bg-blue-100 text-blue-600" : "text-gray-700 hover:bg-gray-100"
         }`;
 
     return (
-        <div className="w-full border border-gray-300 rounded-lg overflow-hidden focus-within:border-orange-500 focus-within:ring-2 focus-within:ring-orange-100 transition">
+        <div className="w-full border border-gray-300 rounded-lg overflow-hidden focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition">
             <div className="flex flex-wrap items-center gap-1 px-2 py-1 border-b border-gray-200 bg-gray-50">
                 <button
                     type="button"
