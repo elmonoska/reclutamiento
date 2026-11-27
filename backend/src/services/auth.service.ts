@@ -1,13 +1,19 @@
 import AuthToken from "../models/auth-token.model";
+import Role from "../models/role.model";
 import User from "../models/user.model";
 import { checkPassword, hashPassword } from "../utils/auth/bcrypt.utils";
 import { generateJWT } from "../utils/auth/jwt.utils";
 import AuthTokenService from "./auth-token.service";
+import RoleService from "./role.service";
+import { USER_ROLES } from "../constants/auth.constants";
+import type { TUserRoleName } from "../types/auth.type";
+import { APP_ERROR } from "../constants/errors.constants";
 
 export default class AuthService {
-    static async createUser(name: User['name'], email: User['email'], password: User['password']) {
+    static async createUser(name: User['name'], email: User['email'], password: User['password'], roleName: TUserRoleName = USER_ROLES.RECRUITER) {
         const hashedPassword = await hashPassword(password);
-        const user = await User.create({name, email, password: hashedPassword});
+        const role = await RoleService.getRoleByName(roleName);
+        const user = await User.create({name, email, password: hashedPassword, id_role: role.id_role});
         await AuthTokenService.generateAndSendToken(user, 'confirmation');
         return user;
     }
@@ -15,15 +21,16 @@ export default class AuthService {
     static async authenticate(password: User['password'], user: User) {
         if (!user.confirmed) {
             await AuthTokenService.generateAndSendToken(user, 'confirmation');
-            throw new Error('UNCONFIRMED_ACCOUNT');
+            throw new Error(APP_ERROR.UNCONFIRMED_ACCOUNT);
         }
 
         const isValidPassword = await checkPassword(password, user.password);
         if (!isValidPassword) {
-            throw new Error('INVALID_CREDENTIALS');
+            throw new Error(APP_ERROR.INVALID_CREDENTIALS);
         }
 
-        return await generateJWT(user.uuid_user);
+        const role = user.id_role ? await Role.findByPk(user.id_role) : null;
+        return await generateJWT({ uuid_user: user.uuid_user, id_role: user.id_role, role: role?.name });
     }
 
     static async requestPasswordReset(email: User['email']) {

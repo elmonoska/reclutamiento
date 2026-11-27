@@ -3,6 +3,7 @@ import morgan from "morgan";
 import router from "./routes/index.routes";
 import cors from 'cors';
 import { corsOptions } from "./config/cors";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
@@ -14,6 +15,9 @@ app.use(morgan('dev'));
 
 // configuracion de cors
 app.use(cors(corsOptions));
+
+// uso de cookies
+app.use(cookieParser());
 
 // rutas de la api
 app.use('/api', router);

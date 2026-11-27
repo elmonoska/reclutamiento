@@ -1,6 +1,6 @@
-import "dotenv/config";
+﻿import "dotenv/config";
 import app from "./app";
-import { PORT } from "./constants";
+import { PORT } from "./constants/index.constants";
 import Logger from "./utils/logger.utils";
 import dbConnection from "./db/config";
 import { normalizeError } from "./helpers/response.helper";

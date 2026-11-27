@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
-import type { TLoginForm } from "../../types/forms";
+import type { TLoginForm } from "../../types/form.type";
 import { FiEye, FiEyeOff } from "react-icons/fi";
-import { login } from "../../api/auth";
+import { login, verifySesion } from "../../api/auth";
 import { toast } from "react-toastify";
+import { useAuth } from "../../contexts/AuthContext";
 
 const initialValues: TLoginForm = {
     email: '',
@@ -14,6 +15,7 @@ const initialValues: TLoginForm = {
 export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
+    const { checkAuth } = useAuth();
 
     const {
         register,
@@ -28,9 +30,17 @@ export default function LoginPage() {
             return;
         }
 
+        await checkAuth();
+        const verify = await verifySesion();
+        const role = verify.success ? verify.data.user.role?.name : null;
+        if (role === 'candidate') {
+            navigate('/candidato/completar-perfil');
+        } else if (role === 'recruiter' || role === 'admin') {
+            navigate('/panel');
+        } else {
+             navigate('/');
+        }
         toast.success(res.message);
-        localStorage.setItem('token', res.data.token);
-        navigate('/');
     };
 
     return (
@@ -77,7 +87,7 @@ export default function LoginPage() {
                                         message: "Ingresa un correo electrónico válido"
                                     }
                                 })}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                             />
 
                             {errors.email && (
@@ -109,13 +119,13 @@ export default function LoginPage() {
                                             message: "La contraseña debe tener al menos 6 caracteres"
                                         }
                                     })}
-                                    className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+                                    className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                                 />
 
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-orange-500 transition"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-500 transition"
                                     aria-label={
                                         showPassword
                                             ? "Ocultar contraseña"
@@ -141,7 +151,7 @@ export default function LoginPage() {
                         <div className="flex justify-end">
                             <Link
                                 to="/auth/olvide-contrasena"
-                                className="text-sm font-medium text-orange-500 hover:text-orange-600 transition"
+                                className="text-sm font-medium text-blue-500 hover:text-blue-600 transition"
                             >
                                 ¿Olvidaste tu contraseña?
                             </Link>
@@ -151,7 +161,7 @@ export default function LoginPage() {
                         <button
                             type="submit"
                             disabled={!isValid}
-                            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition duration-200 shadow-sm cursor-pointer disabled:bg-orange-200 disabled:cursor-not-allowed disabled:text-white"
+                            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition duration-200 shadow-sm cursor-pointer disabled:bg-blue-200 disabled:cursor-not-allowed disabled:text-white"
                         >
                             Iniciar sesión
                         </button>
@@ -159,17 +169,13 @@ export default function LoginPage() {
                     </form>
 
                     {/* crear cuenta */}
-                    <div className="mt-6 pt-6 border-t border-gray-100 text-center">
+                    <div className="mt-6 pt-6 border-t border-gray-100 text-center space-y-2">
                         <p className="text-sm text-gray-500">
-                            ¿No tienes una cuenta?
+                            ¿Buscas empleo? <Link to="/auth/registro-candidato" className="font-semibold text-blue-500 hover:text-blue-600 transition">Crear cuenta de candidato</Link>
                         </p>
-
-                        <Link
-                            to="/auth/crear-cuenta"
-                            className="mt-1 inline-block text-sm font-semibold text-orange-500 hover:text-orange-600 transition"
-                        >
-                            Crear una cuenta
-                        </Link>
+                        <p className="text-sm text-gray-500">
+                            ¿Eres reclutador? <Link to="/auth/crear-cuenta" className="font-semibold text-blue-500 hover:text-blue-600 transition">Crear cuenta de reclutador</Link>
+                        </p>
                     </div>
 
                 </div>

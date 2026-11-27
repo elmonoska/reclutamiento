@@ -1,0 +1,33 @@
+import { Navigate, Outlet } from 'react-router'
+import Footer from "../components/Footer";
+import NavbarAuth from '../components/NavbarAuth';
+import { useAuth } from '../contexts/AuthContext';
+import { PanelProvider } from '../contexts/PanelContext';
+
+export default function AccountLayout() {
+    const { isAuthenticated, isLoading, user } = useAuth();
+
+    if (isLoading) {
+        return (<h1>Cargando...</h1>);
+    }
+    
+    if (!isAuthenticated) {
+        return <Navigate to="/auth/iniciar-sesion" />
+    }
+
+    if (user?.role?.name === 'candidate') {
+        return <Navigate to="/candidato" />
+    }
+
+    return (
+        <PanelProvider>
+            <div className="flex flex-col gap-2 h-dvh">
+                <NavbarAuth />
+                <main className="grow w-full max-w-4xl m-auto">
+                    <Outlet />
+                </main>
+                <Footer />
+            </div>
+        </PanelProvider>
+    )
+}

@@ -1,9 +1,12 @@
 import {Request, Response, NextFunction} from 'express';
 import Logger from '../utils/logger.utils';
 import { normalizeError, sendError } from '../helpers/response.helper';
-import User from '../models/user.model';
-import { TRequestWithUser, TRequestWithUserAndToken } from '../types/auth';
+import { TRequestWithUser, TRequestWithUserAndToken } from '../types/auth.type';
 import AuthToken from '../models/auth-token.model';
+import User from '../models/user.model';
+import Role from '../models/role.model';
+import type { TUserRoleName } from '../types/auth.type';
+import { validateJWT } from '../utils/auth/jwt.utils';
 
 export async function preventDuplicateEmail(req: Request, res: Response, next: NextFunction) {
     try {
@@ -76,5 +79,48 @@ export async function validateAuthTokenById(req: TRequestWithUserAndToken, res: 
     } catch (err) {
         Logger.error(`Ocurrio un error al validar el token: ${normalizeError(err)}`);
         return sendError(res, 500, 'Ocurrio un error al validar el token');
+    }
+}
+
+export async function validateCookieToken(req: TRequestWithUser, res: Response, next: NextFunction) {
+    try {
+        const message = 'No autorizado';
+
+        const token = req.cookies.token;
+        if (!token) {
+            return sendError(res, 401, message)
+        };
+
+        const decodedPayload = validateJWT(token) as any;
+        const user = await User.findOne({
+            where: {uuid_user: decodedPayload.uuid_user},
+            include: [{ model: Role, attributes: ['id_role', 'name'] }]
+        });
+        if (!user) {
+            return sendError(res, 401, message)
+        };
+        req.user = user;
+
+        next();
+    } catch (err: any) {
+        if (err.name === 'TokenExpiredError') {
+            Logger.error(`Token expirado: ${normalizeError(err)}`);;
+        } else if (err.name === 'JsonWebTokenError') {
+            Logger.error(`Token invalido: ${normalizeError(err)}`);;
+        } else {
+            Logger.error(`Ocurrio un error al verificar la sesion: ${normalizeError(err)}`);
+            return sendError(res, 500, 'Ocurrio un error al verificar la sesion');
+        }
+        return sendError(res, 401, 'No autorizado');
+    }
+}
+
+export function requireRole(...roles: TUserRoleName[]) {
+    return async (req: TRequestWithUser, res: Response, next: NextFunction) => {
+        const roleName = req.user?.role?.name as TUserRoleName | undefined;
+        if (!roleName || !roles.includes(roleName)) {
+            return sendError(res, 403, 'No tienes permisos para realizar esta acción');
+        }
+        return next();
     }
 }

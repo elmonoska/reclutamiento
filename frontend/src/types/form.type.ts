@@ -1,0 +1,48 @@
+// formularios de autenticacion
+export type TAuthForm = {
+    name: string;
+    email: string;
+    password: string;
+    confirm_password: string;
+    token: string;
+    uuid_user: string;
+}
+export type TLoginForm = Pick<TAuthForm, 'email' | 'password'>;
+export type TSignupForm = Pick<TAuthForm, 'name' | 'email' | 'password' | 'confirm_password'>;
+export type TConfirmAccountForm = Pick<TAuthForm, 'uuid_user' | 'token'>;
+export type TForgotPasswordForm = Pick<TAuthForm, 'email'>;
+export type TResetPasswordForm = Pick<TAuthForm, 'password' | 'confirm_password' | 'token'>;
+
+export type TJobPostingForm = {
+    title: string;
+    description: string;
+    requirements: string;
+    benefits: string;
+    salary_min: number | null;
+    salary_max: number | null;
+    id_state: number | '';
+    id_job_category: number | '';
+    id_employment_type: number | '';
+    id_experience_level: number | '';
+    id_education_level: number | '';
+    id_work_model: number | '';
+};
+
+export type TEditJobPostingForm = TJobPostingForm & {
+    status: 'published' | 'closed' | '';
+};
+
+export type TCandidateProfileForm = {
+    phone: string;
+    headline: string;
+    summary: string;
+    id_state: number | '';
+    id_education_level: number | '';
+    id_experience_level: number | '';
+    id_work_model: number | '';
+    expected_salary: number | '';
+    linkedin_url: string;
+    github_url: string;
+    portfolio_url: string;
+    resume: FileList;
+};
